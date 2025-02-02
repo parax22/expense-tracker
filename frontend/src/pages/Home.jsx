@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api";
 import Expense from "../components/Expense"
-import "../styles/Home.css"
 
 function Home() {
     const [expenses, setExpenses] = useState([]);
