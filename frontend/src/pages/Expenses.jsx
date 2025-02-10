@@ -12,15 +12,6 @@ function Expenses() {
     const [loading, setLoading] = useState(false);
     const [expenses, setExpenses] = useState([]);
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(+event.target.value);
-        setPage(0);
-    };
-
     const getExpenses = () => {
         setLoading(true);
         api.get("/api/expenses/")
