@@ -5,7 +5,7 @@ import { TextField, Button, CircularProgress, Typography, Box } from "@mui/mater
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
-function Form({ route, method }) {
+function AuthenticationForm({ route, method }) {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -80,4 +80,4 @@ function Form({ route, method }) {
     );
 }
 
-export default Form;
+export default AuthenticationForm;
