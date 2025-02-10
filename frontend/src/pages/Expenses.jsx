@@ -60,7 +60,7 @@ function Expenses() {
     return (
         <>
             <Paper elevation={3} style={{ padding: 20 }}>
-                <Typography variant="h5" sx={{ mb: 2 }}><strong>Expenses</strong></Typography>
+                <Typography variant="h5" gutterBottom><strong>Expenses</strong></Typography>
                 {
                     loading ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

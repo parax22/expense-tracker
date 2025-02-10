@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,6 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
 import { createTheme, colors, ThemeProvider } from "@mui/material";
 import Expenses from "./pages/Expenses";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 function Logout() {
   localStorage.clear();
@@ -29,9 +30,10 @@ const darkTheme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={darkTheme}>
-      <BrowserRouter>
-        <Sidebar />
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ThemeProvider theme={darkTheme}>
+        <BrowserRouter>
+          <Sidebar />
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
@@ -39,10 +41,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/register" element={<RegisterAndLogout />} />
-            <Route path="*" element={<NotFound />} />  
+            <Route path="*" element={<NotFound />} />
           </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </LocalizationProvider>
   )
 }
 
