@@ -30,7 +30,6 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <BrowserRouter>
         <Sidebar />
-        <Box sx={{ ml: { md: "240px" }, p: 2, mt: { xs: 5, md: 0 } }}>
           <Routes>
             <Route 
               path="/" 
@@ -45,7 +44,6 @@ function App() {
             <Route path="/register" element={<RegisterAndLogout />} />
             <Route path="*" element={<NotFound />} />  
           </Routes>
-        </Box>
       </BrowserRouter>
     </ThemeProvider>
   )

@@ -3,8 +3,9 @@ import { jwtDecode } from 'jwt-decode';
 import api from '../api';
 import { REFRESH_TOKEN, ACCESS_TOKEN } from '../constants';
 import { useState, useEffect } from 'react';
+import { Box } from '@mui/material';
 
-function ProtectedRoute({children}){
+function ProtectedRoute({ children }) {
     const [isAuthorized, setIsAuthorized] = useState(null);
 
     useEffect(() => {
@@ -51,7 +52,7 @@ function ProtectedRoute({children}){
         return <div>Loading...</div>
     }
 
-    return isAuthorized ? children : <Navigate to="/login" />
+    return isAuthorized ? (<Box sx={{ ml: { md: "240px" }, p: 2, mt: { xs: 5, md: 0 } }}>{children}</Box>) : (<Navigate to="/login" />);
 }
 
 export default ProtectedRoute;
