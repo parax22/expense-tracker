@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api";
 import Expense from "../components/Expense"
 
-function Home() {
+function Dashboard() {
     const [expenses, setExpenses] = useState([]);
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
@@ -11,16 +11,14 @@ function Home() {
     const [date, setDate] = useState("");
 
     useEffect(() => {
-      getExpenses();
+        getExpenses();
     }, []);
 
     const getExpenses = () => {
-        api
-            .get("/api/expenses/")
+        api.get("/api/expenses/")
             .then((res) => res.data)
             .then((data) => {
                 setExpenses(data);
-                console.log(data);
             })
             .catch((err) => alert(err));
     };
@@ -51,10 +49,17 @@ function Home() {
     return (
         <div>
             <div>
-                <h2>Expenses</h2>
-                {expenses.map((expense) => (
-                    <Expense expense={expense} onDelete={deleteExpense} key={expense.id} />
-                ))}
+                <h2>Latest Expense</h2>
+                {
+                    expenses.length > 0 ? (
+                        <Expense
+                            expense={expenses[expenses.length - 1]}
+                            onDelete={deleteExpense}
+                        />
+                    ) : (
+                        <p>No expenses found.</p>
+                    )
+                }
             </div>
             <h2>Create a Expense</h2>
             <form onSubmit={createExpense}>
@@ -115,4 +120,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default Dashboard;
