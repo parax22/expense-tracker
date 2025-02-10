@@ -3,6 +3,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useState, useEffect } from "react";
 import api from "../api";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SnackbarAlert from "../components/SnackbarAlert";
 
 function Expenses() {
     useEffect(() => {
@@ -11,6 +12,15 @@ function Expenses() {
 
     const [loading, setLoading] = useState(false);
     const [expenses, setExpenses] = useState([]);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [severity, setSeverity] = useState('');
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+
+    const createAlert = (message, severity) => {
+        setAlertMessage(message);
+        setSeverity(severity);
+        setOpenSnackbar(true);
+    };
 
     const getExpenses = () => {
         setLoading(true);
@@ -19,7 +29,9 @@ function Expenses() {
             .then((data) => {
                 setExpenses(data);
             })
-            .catch((err) => alert(err))
+            .catch((err) => {
+                createAlert(err.message || "Something went wrong!", "error");
+            })
             .finally(() => setLoading(false));
     };
 
@@ -27,11 +39,17 @@ function Expenses() {
         api
             .delete(`/api/expenses/delete/${id}/`)
             .then((res) => {
-                if (res.status === 204) alert("Expense deleted!");
-                else alert("Failed to delete Expense.");
+                if (res.status === 204) {
+                    createAlert("Expense deleted!", "success");
+                }
+                else {
+                    createAlert("Failed to delete Expense.", "error");
+                }
                 getExpenses();
             })
-            .catch((error) => alert(error));
+            .catch((error) => {
+                createAlert(error.message || "Something went wrong!", "error");
+            });
     };
 
     const columns = [
@@ -86,6 +104,13 @@ function Expenses() {
                         </>
                 }
             </Paper>
+
+            <SnackbarAlert
+                open={openSnackbar}
+                severity={severity}
+                message={alertMessage}
+                onClose={() => setOpenSnackbar(false)}
+            />
         </>
     );
 }

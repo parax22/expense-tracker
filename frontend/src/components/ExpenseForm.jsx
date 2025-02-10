@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2';
 import dayjs from 'dayjs';
 import api from "../api";
 
-function ExpenseForm({ getExpenses }) {
+function ExpenseForm({ getExpenses, onClose, createAlert }) {
     const preferredCurrency = localStorage.getItem("preferredCurrency") || "USD";
 
     const [description, setDescription] = useState("");
@@ -46,7 +46,7 @@ function ExpenseForm({ getExpenses }) {
         e.preventDefault();
 
         if (errors.description || errors.category || errors.amount) {
-            alert("Please fix the errors before submitting.");
+            createAlert("Please fix the errors before submitting.", "error");
             return;
         }
 
@@ -56,18 +56,23 @@ function ExpenseForm({ getExpenses }) {
         api.post("/api/expenses/", { description, category, currency, amount, date:formattedDate })
             .then((res) => {
                 if (res.status === 201) {
-                    alert("Expense created!");
+                    createAlert("Expense created successfully.", "success");
+
                     setDescription("");
                     setCategory("");
                     setCurrency(preferredCurrency);
                     setAmount("");
                     setDate(dayjs());
+                    
                     getExpenses();
+                    onClose();
                 } else {
-                    alert("Failed to make expense.");
+                    createAlert("Failed to create Expense.", "error");
                 }
             })
-            .catch((err) => alert(err.message));
+            .catch((err) => {
+                createAlert(err.message || "Something went wrong!", "error");
+            });
     };
 
     return (
