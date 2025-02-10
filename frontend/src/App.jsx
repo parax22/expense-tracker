@@ -5,8 +5,8 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Toolbar from "./components/Toolbar";
-import { createTheme, colors, ThemeProvider } from "@mui/material";
+import Sidebar from "./components/Sidebar";
+import { createTheme, colors, ThemeProvider, Box } from "@mui/material";
 
 function Logout() {
   localStorage.clear();
@@ -29,21 +29,23 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <BrowserRouter>
-        <Toolbar/>
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/logout" element={<Logout />} />
-          <Route path="/register" element={<RegisterAndLogout />} />
-          <Route path="*" element={<NotFound />} />  
-        </Routes>
+        <Sidebar />
+        <Box sx={{ ml: { md: "240px" }, p: 2, mt: { xs: 5, md: 0 } }}>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/register" element={<RegisterAndLogout />} />
+            <Route path="*" element={<NotFound />} />  
+          </Routes>
+        </Box>
       </BrowserRouter>
     </ThemeProvider>
   )
