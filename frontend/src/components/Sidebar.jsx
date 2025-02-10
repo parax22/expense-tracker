@@ -32,6 +32,9 @@ function Sidebar() {
         <ListItem button="true" onClick={() => navigate("/expenses")} sx={{ px: 10, "&:hover, &:focus, &:active": { bgcolor: "action.hover" } }}>
           <ListItemText primary="Expenses" />
         </ListItem>
+        <ListItem button="true" onClick={() => navigate("/settings")} sx={{ px: 10, "&:hover, &:focus, &:active": { bgcolor: "action.hover" } }}>
+          <ListItemText primary="Settings" />
+        </ListItem>
       </List>
       <Box sx={{ mt: "auto", p: 5 }}>
         <Button variant="contained" color="error" onClick={handleLogout} sx={{ width: "100%", textTransform: "none", px: 5 }}>

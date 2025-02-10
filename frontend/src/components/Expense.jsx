@@ -14,7 +14,7 @@ function Expense({ expense, onDelete }) {
                 <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
                     { formattedDate }
                 </Typography>
-                <Typography variant="h5" component="div">
+                <Typography variant="h6" component="div">
                     { expense.description }
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
