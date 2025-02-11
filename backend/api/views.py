@@ -1,35 +1,116 @@
 from django.shortcuts import render
+from django.db import transaction
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .serializers import UserSerializer, ExpenseSerializer
+from .serializers import UserSerializer, ExpenseSerializer, CategorySerializer, SettingSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Expense
+from .models import Expense, Category, Setting
 
 
 # Create your views here.
-class CreateUserView(generics.CreateAPIView):
+class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-class CreateExpenseListView(generics.ListCreateAPIView):
+    @transaction.atomic
+    def perform_create(self, serializer):
+        user = serializer.save()
+        Setting.objects.create(user=user)
+
+# Expense Views
+class ExpenseListCreateView(generics.ListCreateAPIView):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Expense.objects.filter(user=self.request.user)
-    
+
+    def perform_create(self, serializer):
+        category_name = self.request.data.get('category_name')
+
+        if category_name:
+            category, created = Category.objects.get_or_create(
+                name=category_name.lower().capitalize(),
+                user=self.request.user
+            )
+            if created:
+                print(f"Category '{category_name}' was created.")
+
+            serializer.save(user=self.request.user, category=category, category_name=category.name)
+        else:
+            print("Category name is missing from the request data.")
+
+class ExpenseUpdateView(generics.UpdateAPIView):
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return Expense.objects.get(id=self.kwargs['pk'], user=self.request.user)
+
+    def perform_update(self, serializer):
+        category_name = self.request.data.get('category_name')
+
+        if category_name:
+            category, created = Category.objects.get_or_create(
+                name=category_name.lower().capitalize(),
+                user=self.request.user
+            )
+            if created:
+                print(f"Category '{category_name}' was created.")
+            serializer.save(user=self.request.user, category=category, category_name=category.name)
+        else:
+            print("Category name is missing from the request data.")
+
+class ExpenseDeleteView(generics.DestroyAPIView):
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Expense.objects.filter(user=self.request.user)
+
+
+# Category Views
+class CategoryListCreateView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print(serializer.errors)
+
+
+# Setting Views
+class SettingListCreateView(generics.ListCreateAPIView):
+    queryset = Setting.objects.all()
+    serializer_class = SettingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Setting.objects.filter(user=self.request.user)
+
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save(user=self.request.user)
         else:
             print(serializer.errors)
 
-class DeleteExpenseView(generics.DestroyAPIView):
-    queryset = Expense.objects.all()
-    serializer_class = ExpenseSerializer
+class SettingUpdateView(generics.UpdateAPIView):
+    queryset = Setting.objects.all()
+    serializer_class = SettingSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Expense.objects.filter(user=self.request.user)
+    def get_object(self):
+        return Setting.objects.get(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)

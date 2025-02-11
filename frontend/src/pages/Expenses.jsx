@@ -55,7 +55,7 @@ function Expenses() {
     const columns = [
         { field: "id", headerName: "ID", width: 90 },
         { field: "description", headerName: "Description", width: 200 },
-        { field: "category", headerName: "Category", width: 150 },
+        { field: "category_name", headerName: "Category", width: 150 },
         { field: "amount", headerName: "Amount", width: 150 },
         { field: "currency", headerName: "Currency", width: 100 },
         { field: "date", headerName: "Date", width: 150 },

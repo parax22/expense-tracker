@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import api from "../api";
 
 function ExpenseForm({ getExpenses, onClose, createAlert }) {
-    const preferredCurrency = localStorage.getItem("preferredCurrency") || "USD";
+    const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
 
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
@@ -51,9 +51,7 @@ function ExpenseForm({ getExpenses, onClose, createAlert }) {
         }
 
         const formattedDate = date.format("YYYY-MM-DD");
-        console.log({ description, category, currency, amount, formattedDate });
-
-        api.post("/api/expenses/", { description, category, currency, amount, date:formattedDate })
+        api.post("/api/expenses/", { description, category_name:category, currency, amount, date:formattedDate })
             .then((res) => {
                 if (res.status === 201) {
                     createAlert("Expense created successfully.", "success");

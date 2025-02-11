@@ -17,7 +17,7 @@ function Expense({ expense, onDelete }) {
                     { expense.description }
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                    { expense.category }
+                    { expense.category_name }
                 </Typography>
                 <Typography variant="body2">
                     { expense.currency } { expense.amount }
