@@ -38,7 +38,7 @@ function Sidebar() {
       </List>
       <Box sx={{ mt: "auto", p: 5 }}>
         <Button variant="contained" color="error" onClick={handleLogout} sx={{ width: "100%", textTransform: "none", px: 5 }}>
-          Logout
+          LOGOUT
         </Button>
       </Box>
     </Box>

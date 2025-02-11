@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 import { Card, CardContent, CardActions, Typography } from "@mui/material";
 
-function Expense({ expense, onDelete }) {
+function Expense({ expense, onDelete, onEdit }) {
     const formattedDate = new Date(expense.date).toLocaleDateString("en-US");
 
     return (
@@ -24,7 +24,7 @@ function Expense({ expense, onDelete }) {
                 </Typography>
             </CardContent>
             <CardActions>
-                <Button startIcon={<EditIcon/>} size="small" color="secondary">
+                <Button startIcon={<EditIcon/>} size="small" color="secondary" onClick={() => onEdit(expense.id, expense)}>
                     Edit
                 </Button>
                 <Button startIcon={<DeleteIcon/>} size="small" color="error" onClick={() => onDelete(expense.id)}>

@@ -12,10 +12,11 @@ function Dashboard() {
     const [open, setOpen] = useState(false);
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectedExpense, setSelectedExpense] = useState(null)
     const [alertMessage, setAlertMessage] = useState('');
     const [severity, setSeverity] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
-
+        
     const createAlert = (message, severity) => {
         setAlertMessage(message);
         setSeverity(severity);
@@ -37,6 +38,12 @@ function Dashboard() {
                 createAlert(err.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
+    };
+
+    const editExpense = (id) => {
+        const expense = expenses.find((expense) => expense.id === id);
+        setSelectedExpense(expense);
+        setOpen(true);
     };
 
     const deleteExpense = (id) => {
@@ -68,7 +75,7 @@ function Dashboard() {
                                     <CircularProgress />
                                 </Box> :
                                 expenses.length > 0 ? (
-                                    <Expense expense={expenses[expenses.length - 1]} onDelete={deleteExpense} />
+                                    <Expense expense={expenses[expenses.length - 1]} onDelete={deleteExpense} onEdit={editExpense} />
                                 ) : (
                                     <p>No expenses found.</p>
                                 )
@@ -81,13 +88,33 @@ function Dashboard() {
                     </Paper>
                 </Grid>
             </Grid>
-            <Button variant="contained" color="primary" onClick={() => setOpen(true)} sx={{ mt: 2 }}>
+            <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => {
+                    setOpen(true); 
+                    setSelectedExpense(null); 
+                }} 
+                sx={{ mt: 2 }}>
                 Create New Expense
             </Button>
 
-            <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+            <Dialog 
+                open={open} 
+                onClose={() => { 
+                    setOpen(false); 
+                    setSelectedExpense(null);
+                }} 
+                fullWidth
+                maxWidth="sm"
+            >
                 <DialogContent>
-                    <ExpenseForm getExpenses={getExpenses} onClose={() => setOpen(false)} createAlert={createAlert} />
+                    <ExpenseForm 
+                        getExpenses={getExpenses} 
+                        onClose={() => { setOpen(false); setSelectedExpense(null);}} 
+                        createAlert={createAlert} 
+                        selectedExpense={selectedExpense}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button color="error" onClick={() => setOpen(false)}>
