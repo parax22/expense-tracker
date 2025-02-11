@@ -1,9 +1,11 @@
-import { Typography, Paper, Button, CircularProgress, Box } from "@mui/material";
+import { Typography, Paper, Button, CircularProgress, Box, Dialog, DialogContent, DialogActions } from "@mui/material";
 import { DataGrid } from '@mui/x-data-grid';
 import { useState, useEffect } from "react";
 import api from "../api";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import SnackbarAlert from "../components/SnackbarAlert";
+import ExpenseForm from "../components/ExpenseForm";
 
 function Expenses() {
     useEffect(() => {
@@ -15,6 +17,8 @@ function Expenses() {
     const [alertMessage, setAlertMessage] = useState('');
     const [severity, setSeverity] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [selectedExpense, setSelectedExpense] = useState(null)
 
     const createAlert = (message, severity) => {
         setAlertMessage(message);
@@ -33,6 +37,12 @@ function Expenses() {
                 createAlert(err.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
+    };
+
+    const editExpense = (id) => {
+        const expense = expenses.find((expense) => expense.id === id);
+        setSelectedExpense(expense);
+        setOpen(true);
     };
 
     const deleteExpense = (id) => {
@@ -64,13 +74,22 @@ function Expenses() {
             headerName: "Actions",
             width: 150,
             renderCell: (params) => (
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => deleteExpense(params.row.id)}
-                >
-                    <DeleteIcon />
-                </Button>
+                <>
+                    <Button
+                        variant="text"
+                        color="secondary"
+                        onClick={() => editExpense(params.row.id)}
+                    >
+                        <EditIcon />
+                    </Button>
+                    <Button
+                        variant="text"
+                        color="error"
+                        onClick={() => deleteExpense(params.row.id)}
+                    >
+                        <DeleteIcon />
+                    </Button>
+                </>
             ),
         }
     ]
@@ -104,7 +123,29 @@ function Expenses() {
                         </>
                 }
             </Paper>
-
+            <Dialog 
+                open={open} 
+                onClose={() => { 
+                    setOpen(false); 
+                    setSelectedExpense(null);
+                }} 
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogContent>
+                    <ExpenseForm 
+                        getExpenses={getExpenses} 
+                        onClose={() => { setOpen(false); setSelectedExpense(null);}} 
+                        createAlert={createAlert} 
+                        selectedExpense={selectedExpense}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button color="error" onClick={() => setOpen(false)}>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <SnackbarAlert
                 open={openSnackbar}
                 severity={severity}
