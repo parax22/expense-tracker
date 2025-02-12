@@ -38,5 +38,5 @@ class SettingSerializer(serializers.ModelSerializer):
 class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
-        fields = ["id", "amount", "currency", "date", "description", "category", "category_name", "user"]
+        fields = ["id", "amount", "currency", "date", "description", "category", "category_name", "is_recurring", "user"]
         extra_kwargs = {"user": {"read_only": True}, "category": {"read_only": True}}

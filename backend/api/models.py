@@ -8,6 +8,7 @@ class Expense(models.Model):
     description = models.TextField(max_length=50, default="No description")
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='expenses')
     category_name = models.CharField(max_length=20, default='Other')
+    is_recurring = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
 
     def __str__(self):

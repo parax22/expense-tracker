@@ -42,6 +42,13 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
         else:
             print("Category name is missing from the request data.")
 
+class RecurringExpenseListView(generics.ListAPIView):
+    serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Expense.objects.filter(user=self.request.user, is_recurring=True)
+
 class ExpenseUpdateView(generics.UpdateAPIView):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer

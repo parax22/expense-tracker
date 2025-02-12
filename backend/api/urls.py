@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('expenses/', views.ExpenseListCreateView.as_view(), name='expenses'),
+    path('expenses/recurring/', views.RecurringExpenseListView.as_view(), name='recurring_expenses'),
     path('expenses/update/<int:pk>/', views.ExpenseUpdateView.as_view(), name='update_expense'),
     path('expenses/delete/<int:pk>/', views.ExpenseDeleteView.as_view(), name='delete_expense'),
     path('categories/', views.CategoryListCreateView.as_view(), name='categories'),
