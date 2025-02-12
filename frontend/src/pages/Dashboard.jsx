@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import api from "../api";
 import Expense from "../components/Expense";
-import Grid from '@mui/material/Grid2';
-import { Box, Typography, Paper, Button, Dialog, DialogContent, DialogActions, CircularProgress } from "@mui/material";
-import ExpenseForm from "../components/ExpenseForm";
+import { Button, Card, Dialog, ProgressSpinner } from "../ui";
 import SnackbarAlert from "../components/SnackbarAlert";
+import ExpenseForm from "../components/ExpenseForm";
 
 function Dashboard() {
     const preferredCurrency = localStorage.getItem("preferredCurrency") || "USD";
 
     const [open, setOpen] = useState(false);
     const [expenses, setExpenses] = useState([]);
+    const [recurringExpenses, setRecurringExpenses] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [selectedExpense, setSelectedExpense] = useState(null)
+    const [selectedExpense, setSelectedExpense] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
     const [severity, setSeverity] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
-        
+
     const createAlert = (message, severity) => {
         setAlertMessage(message);
         setSeverity(severity);
@@ -25,6 +25,7 @@ function Dashboard() {
 
     useEffect(() => {
         getExpenses();
+        getRecurringExpenses();
     }, []);
 
     const getExpenses = () => {
@@ -33,6 +34,19 @@ function Dashboard() {
             .then((res) => res.data)
             .then((data) => {
                 setExpenses(data);
+            })
+            .catch((err) => {
+                createAlert(err.message || "Something went wrong!", "error");
+            })
+            .finally(() => setLoading(false));
+    };
+
+    const getRecurringExpenses = () => {
+        setLoading(true);
+        api.get("/api/expenses/recurring/")
+            .then((res) => res.data)
+            .then((data) => {
+                setRecurringExpenses(data);
             })
             .catch((err) => {
                 createAlert(err.message || "Something went wrong!", "error");
@@ -65,62 +79,82 @@ function Dashboard() {
 
     return (
         <>
-            <Grid container spacing={2}>
-                <Grid size={4}>
-                    <Paper elevation={3} style={{ padding: 20 }}>
-                        <Typography variant="h5" gutterBottom><strong>Latest Expense</strong></Typography>
+            <div className="grid">
+                <div className="col-12 lg:col-4">
+                    <div className="p-4 shadow-2 border-round">
+                        <div className="flex flex-wrap justify-content-between align-items-center">
+                            <h2>Latest Expense</h2>
+                            <Button
+                                text
+                                label="Create New Expense"
+                                icon="pi pi-plus"
+                                onClick={() => {
+                                    setOpen(true);
+                                    setSelectedExpense(null);
+                                }}
+                                style={{ marginTop: '1rem' }}
+                            />
+                        </div>
                         {
                             loading ?
-                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <CircularProgress />
-                                </Box> :
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <ProgressSpinner strokeWidth="3" />
+                                </div> :
                                 expenses.length > 0 ? (
                                     <Expense expense={expenses[expenses.length - 1]} onDelete={deleteExpense} onEdit={editExpense} />
                                 ) : (
                                     <p>No expenses found.</p>
                                 )
                         }
-                    </Paper>
-                </Grid>
-                <Grid size={8}>
-                    <Paper elevation={3} style={{ padding: 20 }}>
-                        <Typography variant="h6" gutterBottom><strong>Total Expenses</strong></Typography>
-                    </Paper>
-                </Grid>
-            </Grid>
-            <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={() => {
-                    setOpen(true); 
-                    setSelectedExpense(null); 
-                }} 
-                sx={{ mt: 2 }}>
-                Create New Expense
-            </Button>
+                    </div>
+                </div>
+                <div className="col-12 lg:col-8">
+                    <div className="p-4 shadow-2 border-round">
+                        <div className="flex flex-wrap justify-content-between align-items-center">
+                            <h2>Recurring Expenses</h2>
+                            <Button
+                            text
+                            label="Create New Recurring Expense"
+                            icon="pi pi-plus"
+                            onClick={() => {
+                                setOpen(true);
+                                setSelectedExpense(null);
+                            }}
+                            style={{ marginTop: '1rem' }}
+                        />
+                        </div>
+                        {
+                            loading ?
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <ProgressSpinner strokeWidth="3" />
+                                </div> :
+                                recurringExpenses.length > 0 ? (
+                                    recurringExpenses.map((expense) => (
+                                        <Expense key={expense.id} expense={expense} onDelete={deleteExpense} onEdit={editExpense} />
+                                    ))
+                                ) : (
+                                    <p>No recurring expenses found.</p>
+                                )
+                        }
+                    </div>
+                </div>
+            </div>
 
-            <Dialog 
-                open={open} 
-                onClose={() => { 
-                    setOpen(false); 
+            <Dialog
+                visible={open}
+                onHide={() => {
+                    setOpen(false);
                     setSelectedExpense(null);
-                }} 
-                fullWidth
-                maxWidth="sm"
+                }}
+                closable={false}
+                header={selectedExpense ? "Edit Expense" : "Add Expense"}
             >
-                <DialogContent>
-                    <ExpenseForm 
-                        getExpenses={getExpenses} 
-                        onClose={() => { setOpen(false); setSelectedExpense(null);}} 
-                        createAlert={createAlert} 
-                        selectedExpense={selectedExpense}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button color="error" onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                </DialogActions>
+                <ExpenseForm
+                    getExpenses={getExpenses}
+                    onClose={() => { setOpen(false); setSelectedExpense(null); }}
+                    createAlert={createAlert}
+                    selectedExpense={selectedExpense}
+                />
             </Dialog>
 
             <SnackbarAlert

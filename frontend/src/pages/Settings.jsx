@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Typography, Select, MenuItem, Button, CircularProgress, Box, Paper } from "@mui/material";
+import { Button, ProgressSpinner, Card, Dropdown } from "../ui";
 import api from "../api";
 import SnackbarAlert from "../components/SnackbarAlert";
 
@@ -18,11 +18,16 @@ function Settings() {
     };
 
     useEffect(() => {
-        getSettings();
+        const storedCurrency = localStorage.getItem("preferred_currency");
+        if (storedCurrency) {
+            setCurrency(storedCurrency);
+        } else {
+            getSettings();
+        }
     }, []);
+    
 
     const getSettings = () => {
-        setLoading(true);
         api.get("/api/settings/")
             .then((res) => res.data)
             .then((data) => {
@@ -31,19 +36,22 @@ function Settings() {
             })
             .catch((err) => {
                 createAlert(err.message || "Something went wrong!", "error");
-            })
-            .finally(() => setLoading(false));
+            });
     };
 
     const handleSave = () => {
+        setLoading(true);
         api.put("/api/settings/update/", { preferred_currency: currency })
             .then(() => {
-                createAlert("Settings saved!", "success");
                 getSettings();
+            })
+            .then(() => {
+                createAlert("Settings updated successfully!", "success");
             })
             .catch((err) => {
                 createAlert(err.message || "Something went wrong!", "error");
-            });
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleCancel = () => {
@@ -51,36 +59,38 @@ function Settings() {
         setCurrency(storedCurrency || "USD");
     };
 
-    return (
-        <Paper elevation={3} style={{ padding: 20 }}>
-            <Typography variant="h5" gutterBottom><strong>Settings</strong></Typography>
-            {loading ?
-                <Box display="flex" justifyContent="center" alignItems="center">
-                    <CircularProgress />
-                </Box>
-                :
-                <>
-                    <Typography variant="subtitle1">Preferred Currency:</Typography>
-                    <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                        <MenuItem value="USD">USD</MenuItem>
-                        <MenuItem value="EUR">EUR</MenuItem>
-                        <MenuItem value="GBP">GBP</MenuItem>
-                        <MenuItem value="JPY">JPY</MenuItem>
-                        <MenuItem value="PEN">PEN</MenuItem>
-                        <MenuItem value="ARS">ARS</MenuItem>
-                        <MenuItem value="CLP">CLP</MenuItem>
+    const currencyOptions = [
+        { label: "USD", value: "USD" },
+        { label: "EUR", value: "EUR" },
+        { label: "GBP", value: "GBP" },
+        { label: "JPY", value: "JPY" },
+        { label: "PEN", value: "PEN" },
+        { label: "ARS", value: "ARS" },
+        { label: "CLP", value: "CLP" }
+    ];
 
-                    </Select>
-                    <div style={{ marginTop: 20 }}>
-                        <Button variant="contained" color="primary" onClick={handleSave}>
-                            Save
-                        </Button>
-                        <Button variant="outlined" color="secondary" onClick={handleCancel} style={{ marginLeft: 10 }}>
-                            Cancel
-                        </Button>
+    return (
+        <Card title="Settings">
+            {loading ? (
+                <div className="flex justify-center items-center">
+                    <ProgressSpinner strokeWidth="4" />
+                </div>
+            ) : (
+                <div className="flex flex-column gap-1">
+                    <h3 className="font-medium">Preferred Currency:</h3>
+                    <Dropdown
+                        className="w-min"
+                        value={currency}
+                        options={currencyOptions}
+                        onChange={(e) => setCurrency(e.value)}
+                        placeholder="Select Currency"
+                    />
+                    <div className="flex gap-4 mt-4">
+                        <Button label="Save" icon="pi pi-save" onClick={handleSave}/>
+                        <Button label="Cancel" icon="pi pi-times" onClick={handleCancel} severity="danger"/>
                     </div>
-                </>
-            }
+                </div>
+            )}
 
             <SnackbarAlert
                 open={openSnackbar}
@@ -88,7 +98,7 @@ function Settings() {
                 message={alertMessage}
                 onClose={() => setOpenSnackbar(false)}
             />
-        </Paper>
+        </Card>
     );
 }
 

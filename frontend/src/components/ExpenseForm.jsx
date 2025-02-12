@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Container, Typography, CircularProgress, Box } from "@mui/material";
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import Grid from '@mui/material/Grid2';
-import dayjs from 'dayjs';
+import { Button, Card, ProgressSpinner, InputText, Dropdown, Calendar } from "../ui";
 import api from "../api";
+import dayjs from "dayjs";
 
 function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
     const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
@@ -131,84 +129,85 @@ function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
     };
 
     return (
-        <Container maxWidth="sm">
+        <div>
             {
-                loading ?
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40vh' }}>
-                        <CircularProgress />
-                    </Box> :
-                    <>
-                        <Typography variant="h5" gutterBottom>
-                            {selectedExpense ? "Edit Expense" : "Add Expense"}
-                        </Typography>
+                loading ? (
+                    <div className="flex justify-content-center align-items-center h-6 w-6 m-auto ">
+                        <ProgressSpinner strokeWidth="4" />
+                    </div>
+                ) : (
+                    <div>
                         <form onSubmit={handleSubmit}>
-                            <TextField
-                                label="Description"
-                                fullWidth
-                                value={description}
-                                onChange={handleDescriptionChange}
-                                error={!!errors.description}
-                                helperText={errors.description || ""}
-                                required
-                                sx={{ mt: 2 }}
-                            />
-                            <TextField
-                                label="Category"
-                                fullWidth
-                                value={category}
-                                onChange={handleCategoryChange}
-                                error={!!errors.category}
-                                helperText={errors.category || ""}
-                                required
-                                sx={{ mt: 2 }}
-                            />
-                            <Grid container spacing={2} sx={{ mt: 2 }}>
-                                <Grid size={6}>
-                                    <TextField
-                                        label="Amount"
-                                        fullWidth
-                                        value={amount}
-                                        onChange={handleAmountChange}
-                                        error={!!errors.amount}
-                                        helperText={errors.amount || ""}
-                                        required
-                                    />
-                                </Grid>
-                                <Grid size={6}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="currency-label">Currency</InputLabel>
-                                        <Select
-                                            labelId="currency-label"
+                            <div className="field">
+                                <label htmlFor="description">Description</label>
+                                <InputText
+                                    id="description"
+                                    value={description}
+                                    onChange={handleDescriptionChange}
+                                    className={`w-full ${errors.description ? 'p-invalid' : ''}`}
+                                    required
+                                />
+                                {errors.description && <small className="p-error">{errors.description}</small>}
+                            </div>
+                            <div className="field">
+                                <label htmlFor="category">Category</label>
+                                <InputText
+                                    id="category"
+                                    value={category}
+                                    onChange={handleCategoryChange}
+                                    className={`w-full ${errors.category ? 'p-invalid' : ''}`}
+                                    required
+                                />
+                                {errors.category && <small className="p-error">{errors.category}</small>}
+                            </div>
+                            <div className="grid align-center">
+                                <div className="col-8">
+                                    <div className="field">
+                                        <label htmlFor="amount">Amount</label>
+                                        <InputText
+                                            id="amount"
+                                            value={amount}
+                                            onChange={handleAmountChange}
+                                            className={`w-full ${errors.amount ? 'p-invalid' : ''}`}
+                                            required
+                                        />
+                                        {errors.amount && <small className="p-error">{errors.amount}</small>}
+                                    </div>
+                                </div>
+                                <div className="col-4">
+                                    <div className="field">
+                                        <label htmlFor="currency">Currency</label>
+                                        <Dropdown
                                             id="currency"
                                             value={currency}
-                                            label="Currency"
-                                            onChange={(e) => setCurrency(e.target.value)}
-                                        >
-                                            <MenuItem value="USD">USD</MenuItem>
-                                            <MenuItem value="EUR">EUR</MenuItem>
-                                            <MenuItem value="GBP">GBP</MenuItem>
-                                            <MenuItem value="JPY">JPY</MenuItem>
-                                            <MenuItem value="PEN">PEN</MenuItem>
-                                            <MenuItem value="ARS">ARS</MenuItem>
-                                            <MenuItem value="CLP">CLP</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
-                            <DatePicker
-                                label="Date"
-                                fullWidth
-                                value={date}
-                                onChange={(newDate) => setDate(newDate)}
-                                sx={{ mt: 2 }}
-                            />
-                            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                                {selectedExpense ? "Update Expense" : "Add Expense"}
-                            </Button>
+                                            options={["USD", "EUR", "GBP", "JPY", "PEN", "ARS", "CLP"]}
+                                            onChange={(e) => setCurrency(e.value)}
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="field">
+                                <label htmlFor="date">Date</label>
+                                <Calendar
+                                    id="date"
+                                    value={date.toDate()}  // Convertimos Day.js a Date para Calendar
+                                    onChange={(e) => setDate(dayjs(e.value))}  // Convertimos el valor de Calendar a Day.js
+                                    dateFormat="yy-mm-dd"
+                                    className="w-full"
+                                    required
+                                />
+                            </div>
+                            <div className="flex justify-content-end mt-6">
+                                <Button text severity="danger" type="button" label="Cancel" onClick={onClose} />
+                                <Button type="submit" label={selectedExpense ? "Update Expense" : "Add Expense"} icon="pi pi-plus" />
+                            </div>
                         </form>
-                    </>
+                    </div>
+                )
             }
-        </Container>
+        </div>
     );
 }
 

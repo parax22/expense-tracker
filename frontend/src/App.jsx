@@ -5,11 +5,13 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Sidebar from "./components/Sidebar";
-import { createTheme, colors, ThemeProvider } from "@mui/material";
+import Menu from "./components/Menu";
 import Expenses from "./pages/Expenses";
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { PrimeReactProvider } from 'primereact/api';
+import "primereact/resources/themes/lara-dark-green/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeflex/primeflex.css";
+import "primeicons/primeicons.css";
 
 function Logout() {
   localStorage.clear();
@@ -21,32 +23,23 @@ function RegisterAndLogout() {
   return <Register />
 }
 
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: colors.green,
-  }
-});
-
 function App() {
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <ThemeProvider theme={darkTheme}>
-        <BrowserRouter>
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/logout" element={<Logout />} />
-            <Route path="/register" element={<RegisterAndLogout />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </LocalizationProvider>
-  )
+    <PrimeReactProvider>
+      <BrowserRouter>
+        <Menu />
+        <Routes>
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route path="/register" element={<RegisterAndLogout />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </PrimeReactProvider>
+  );
 }
 
 export default App;

@@ -1,9 +1,6 @@
-import { Typography, Paper, Button, CircularProgress, Box, Dialog, DialogContent, DialogActions } from "@mui/material";
-import { DataGrid } from '@mui/x-data-grid';
 import { useState, useEffect } from "react";
+import { Button, DataTable, Column, Dialog, ProgressSpinner } from "../ui";
 import api from "../api";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import SnackbarAlert from "../components/SnackbarAlert";
 import ExpenseForm from "../components/ExpenseForm";
 
@@ -18,7 +15,7 @@ function Expenses() {
     const [severity, setSeverity] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [open, setOpen] = useState(false);
-    const [selectedExpense, setSelectedExpense] = useState(null)
+    const [selectedExpense, setSelectedExpense] = useState(null);
 
     const createAlert = (message, severity) => {
         setAlertMessage(message);
@@ -51,8 +48,7 @@ function Expenses() {
             .then((res) => {
                 if (res.status === 204) {
                     createAlert("Expense deleted!", "success");
-                }
-                else {
+                } else {
                     createAlert("Failed to delete Expense.", "error");
                 }
                 getExpenses();
@@ -62,90 +58,74 @@ function Expenses() {
             });
     };
 
-    const columns = [
-        { field: "id", headerName: "ID", width: 90 },
-        { field: "description", headerName: "Description", width: 200 },
-        { field: "category_name", headerName: "Category", width: 150 },
-        { field: "amount", headerName: "Amount", width: 150 },
-        { field: "currency", headerName: "Currency", width: 100 },
-        { field: "date", headerName: "Date", width: 150 },
-        {
-            field: "actions",
-            headerName: "Actions",
-            width: 150,
-            renderCell: (params) => (
-                <>
-                    <Button
-                        variant="text"
-                        color="secondary"
-                        onClick={() => editExpense(params.row.id)}
-                    >
-                        <EditIcon />
-                    </Button>
-                    <Button
-                        variant="text"
-                        color="error"
-                        onClick={() => deleteExpense(params.row.id)}
-                    >
-                        <DeleteIcon />
-                    </Button>
-                </>
-            ),
-        }
-    ]
+    const actionsBodyTemplate = (rowData) => {
+        return (
+            <>
+                <Button
+                    text
+                    severity="info"
+                    icon="pi pi-pencil"
+                    onClick={() => editExpense(rowData.id)}
+                />
+                <Button
+                    text
+                    severity="danger"
+                    icon="pi pi-trash"
+                    onClick={() => deleteExpense(rowData.id)}
+                />
+            </>
+        );
+    };
 
     return (
         <>
-            <Paper elevation={3} style={{ padding: 20 }}>
-                <Typography variant="h5" gutterBottom><strong>Expenses</strong></Typography>
+            <div className="p-4 shadow-2 border-round surface-card">
+                <div className="flex justify-content-between align-items-center">
+                    <h2>Expenses</h2>
+                    <Button text label="Add Expense" icon="pi pi-plus" onClick={() => setOpen(true)} />
+                </div>
                 {
                     loading ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <CircularProgress />
-                        </Box>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <ProgressSpinner strokeWidth="4" />
+                        </div>
                     ) :
-                        <>
-                            <DataGrid
-                                rows={expenses}
-                                columns={columns}
-                                rowCount={expenses.length}
-                                paginationMode="server"
-                                initialState={{
-                                    pagination: {
-                                        paginationModel: {
-                                            pageSize: 10
-                                        }
-                                    }
-                                }}
-                                pageSizeOptions={[10, 25, 50]}
-                                disableRowSelectionOnClick
-                            />
-                        </>
+                        <DataTable 
+                            value={expenses} 
+                            paginator
+                            rows={5}
+                            rowsPerPageOptions={[5, 10, 15, 20, 25]}
+                            totalRecords={expenses.length}
+                            emptyMessage="No expenses found."
+                        >
+                            <Column field="id" header="ID" />
+                            <Column field="description" header="Description" sortable />
+                            <Column field="category_name" header="Category" sortable />
+                            <Column field="amount" header="Amount" sortable />
+                            <Column field="currency" header="Currency" sortable />
+                            <Column field="date" header="Date" sortable />
+                            <Column body={actionsBodyTemplate} header="Actions" />
+                        </DataTable>
                 }
-            </Paper>
-            <Dialog 
-                open={open} 
-                onClose={() => { 
-                    setOpen(false); 
+            </div>
+
+            <Dialog
+                visible={open}
+                onHide={() => {
+                    setOpen(false);
                     setSelectedExpense(null);
-                }} 
-                fullWidth
-                maxWidth="sm"
+                }}
+                closable={false}
+                header= { selectedExpense ? "Edit Expense" : "Add Expense" }
             >
-                <DialogContent>
-                    <ExpenseForm 
-                        getExpenses={getExpenses} 
-                        onClose={() => { setOpen(false); setSelectedExpense(null);}} 
-                        createAlert={createAlert} 
-                        selectedExpense={selectedExpense}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button color="error" onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                </DialogActions>
+                <ExpenseForm
+                    getExpenses={getExpenses}
+                    onClose={() => { setOpen(false); setSelectedExpense(null); }}
+                    createAlert={createAlert}
+                    selectedExpense={selectedExpense}
+                />
             </Dialog>
+
             <SnackbarAlert
                 open={openSnackbar}
                 severity={severity}

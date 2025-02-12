@@ -1,36 +1,22 @@
-import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-
-import { Card, CardContent, CardActions, Typography } from "@mui/material";
+import { Card, Button } from '../ui.js';
 
 function Expense({ expense, onDelete, onEdit }) {
-    const formattedDate = new Date(expense.date).toLocaleDateString("en-US");
+    const footer = (
+        <div className="flex gap-2">
+            <Button label="Edit" size="small" severity="info" icon="pi pi-pencil" onClick={() => onEdit(expense.id)} />
+            <Button label="Delete" size="small" severity="danger" icon="pi pi-trash" onClick={() => onDelete(expense.id)} />
+        </div>
+    )
 
     return (
-        <Card className="expense">
-            <CardContent>
-                <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-                    { formattedDate }
-                </Typography>
-                <Typography variant="h6" component="div">
-                    { expense.description }
-                </Typography>
-                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                    { expense.category_name }
-                </Typography>
-                <Typography variant="body2">
-                    { expense.currency } { expense.amount }
-                </Typography>
-            </CardContent>
-            <CardActions>
-                <Button startIcon={<EditIcon/>} size="small" color="secondary" onClick={() => onEdit(expense.id, expense)}>
-                    Edit
-                </Button>
-                <Button startIcon={<DeleteIcon/>} size="small" color="error" onClick={() => onDelete(expense.id)}>
-                    Delete
-                </Button>
-            </CardActions>
+        <Card
+            className="xl:w-8 lg:w-12 m-auto"
+            title={expense.description}
+            subTitle={expense.category_name}
+            footer={footer}
+        >
+            <p className="text-xl font-semibold">{expense.amount} {expense.currency}</p>
+            <p className="text-md font-light">{expense.date}</p>
         </Card>
     );
 }
