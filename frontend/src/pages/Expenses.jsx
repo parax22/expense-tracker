@@ -58,6 +58,31 @@ function Expenses() {
             });
     };
 
+    const exportToCSV = () => {
+        const csvContent = [
+            ["ID", "Description", "Category", "Amount", "Currency", "Date"],
+            ...expenses.map(expense => [
+                expense.id,
+                expense.description,
+                expense.category_name,
+                expense.amount,
+                expense.currency,
+                expense.date
+            ])
+        ]
+        .map(e => e.join(","))
+        .join("\n");
+        
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "expenses.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     const actionsBodyTemplate = (rowData) => {
         return (
             <>
@@ -82,7 +107,11 @@ function Expenses() {
             <div className="p-4 shadow-2 border-round surface-card">
                 <div className="flex justify-content-between align-items-center">
                     <h2>Expenses</h2>
-                    <Button text label="Add Expense" icon="pi pi-plus" onClick={() => setOpen(true)} />
+                    <div>
+                        <Button text label="Add Expense" icon="pi pi-plus" onClick={() => setOpen(true)} />
+                        <Button label="Export" icon="pi pi-download" onClick={() => exportToCSV() }/> 
+                    </div>
+                    
                 </div>
                 {
                     loading ? (
