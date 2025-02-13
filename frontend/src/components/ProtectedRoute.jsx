@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import api from '../api';
 import { REFRESH_TOKEN, ACCESS_TOKEN } from '../constants';
 import { useState, useEffect } from 'react';
+import Menu from "./Menu";
 
 function ProtectedRoute({ children }) {
     const [isAuthorized, setIsAuthorized] = useState(null);
@@ -52,7 +53,11 @@ function ProtectedRoute({ children }) {
     }
 
     return isAuthorized ? (
-        <div className="p-2">{children}</div>
+        <div>
+            <Menu/>
+            <div className="p-2">{children}</div>
+        </div>
+        
         
     ) : (
         <Navigate to="/login" />

@@ -5,7 +5,6 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Menu from "./components/Menu";
 import Expenses from "./pages/Expenses";
 import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/themes/lara-dark-green/theme.css";
@@ -27,7 +26,6 @@ function App() {
   return (
     <PrimeReactProvider>
       <BrowserRouter>
-        <Menu />
         <Routes>
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />

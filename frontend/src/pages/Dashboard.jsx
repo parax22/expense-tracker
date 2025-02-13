@@ -29,6 +29,17 @@ function Dashboard() {
         getRecurringExpenses();
     }, []);
 
+    const getAnalytics = () => {
+        api.get("/api/analytics/")
+            .then((res) => res.data)
+            .then((data) => {
+                console.log(data);
+            })
+            .catch((err) => {
+                createAlert(err.message || "Something went wrong!", "error");
+            });
+    };
+
     const getExpenses = () => {
         setLoading(true);
         api.get("/api/expenses/")
@@ -178,6 +189,7 @@ function Dashboard() {
                         }
                     </div>
                 </div>
+                <Button text label="Get Analytics" onClick={getAnalytics} />
             </div>
 
             <Dialog

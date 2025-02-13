@@ -51,3 +51,11 @@ class Analytics(models.Model):
     def __str__(self):
         category_name = self.category.name if self.category else "All Categories"
         return f"{self.user.username} - {category_name} ({self.month}/{self.year}): {self.total_payments} payments, {self.total_amount} total"
+
+class ExchangeRate(models.Model):
+    currency = models.CharField(max_length=3, unique=True)
+    rate_to_usd = models.DecimalField(max_digits=10, decimal_places=4)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"1 USD = {self.rate_to_usd} {self.currency}"

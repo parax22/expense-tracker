@@ -122,8 +122,8 @@ function Expenses() {
                         <DataTable 
                             value={expenses} 
                             paginator
-                            rows={5}
-                            rowsPerPageOptions={[5, 10, 15, 20, 25]}
+                            rows={10}
+                            rowsPerPageOptions={[10, 15, 20, 25, 50]}
                             totalRecords={expenses.length}
                             emptyMessage="No expenses found."
                         >
