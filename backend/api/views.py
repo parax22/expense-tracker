@@ -2,9 +2,9 @@ from django.shortcuts import render
 from django.db import transaction
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .serializers import UserSerializer, ExpenseSerializer, CategorySerializer, SettingSerializer
+from .serializers import UserSerializer, ExpenseSerializer, CategorySerializer, SettingSerializer, AnalyticsSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Expense, Category, Setting
+from .models import Expense, Category, Setting, Analytics
 
 
 # Create your views here.
@@ -121,3 +121,12 @@ class SettingUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
+
+# Analytics Views
+class AnalyticsListView(generics.ListAPIView):
+    queryset = Analytics.objects.all()
+    serializer_class = AnalyticsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Analytics.objects.filter(user=self.request.user)

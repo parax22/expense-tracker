@@ -9,4 +9,5 @@ urlpatterns = [
     path('categories/', views.CategoryListCreateView.as_view(), name='categories'),
     path('settings/', views.SettingListCreateView.as_view(), name='settings'),    
     path('settings/update/', views.SettingUpdateView.as_view(), name='update_setting'),   
+    path('analytics/', views.AnalyticsListView.as_view(), name='analytics_list'),
 ]

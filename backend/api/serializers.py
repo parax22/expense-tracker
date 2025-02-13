@@ -40,3 +40,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
         model = Expense
         fields = ["id", "amount", "currency", "date", "description", "category", "category_name", "is_recurring", "user"]
         extra_kwargs = {"user": {"read_only": True}, "category": {"read_only": True}}
+
+from rest_framework import serializers
+from .models import Analytics
+
+class AnalyticsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analytics
+        fields = ['user', 'category', 'month', 'year', 'total_amount', 'total_payments']
+        extra_kwargs = { 'user': {'read_only': True}, 'category': {'required': False} }
+

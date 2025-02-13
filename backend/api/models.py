@@ -36,3 +36,18 @@ class Category(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.name}"
+    
+class Analytics(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_analytics')
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='analytics', null=True, blank=True)
+    month = models.IntegerField()
+    year = models.IntegerField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_payments = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'category', 'month', 'year')
+
+    def __str__(self):
+        category_name = self.category.name if self.category else "All Categories"
+        return f"{self.user.username} - {category_name} ({self.month}/{self.year}): {self.total_payments} payments, {self.total_amount} total"
