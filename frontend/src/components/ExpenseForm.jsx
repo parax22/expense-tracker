@@ -3,7 +3,7 @@ import { Button, Card, ProgressSpinner, InputText, Dropdown, Calendar } from "..
 import api from "../api";
 import dayjs from "dayjs";
 
-function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
+function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, selectedExpense, isRecurring }) {
     const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
 
     const [loading, setLoading] = useState(false);
@@ -63,7 +63,15 @@ function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
             return;
         }
 
-        const data = { description, category_name: category, currency, amount, date: date.format("YYYY-MM-DD") };
+        const data = { 
+            description, 
+            category_name: category,
+            currency,
+            amount,
+            date: date.format("YYYY-MM-DD"),
+            is_recurring: isRecurring
+        };
+
         if (selectedExpense) {
             updateExpense(selectedExpense.id, data);
         } else {
@@ -79,6 +87,7 @@ function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
                 if (res.status === 201) {
                     createAlert("Expense created successfully.", "success");
                     getExpenses();
+                    getRecurringExpenses();
                     onClose();
                     resetForm();
                 } else {
@@ -100,6 +109,7 @@ function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
                 if (res.status === 200) {
                     createAlert("Expense updated!", "success");
                     getExpenses();
+                    getRecurringExpenses();
                     onClose();
                     resetForm();
                 }
@@ -188,17 +198,21 @@ function ExpenseForm({ getExpenses, onClose, createAlert, selectedExpense }) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="field">
-                                <label htmlFor="date">Date</label>
-                                <Calendar
-                                    id="date"
-                                    value={date.toDate()}  // Convertimos Day.js a Date para Calendar
-                                    onChange={(e) => setDate(dayjs(e.value))}  // Convertimos el valor de Calendar a Day.js
-                                    dateFormat="yy-mm-dd"
-                                    className="w-full"
-                                    required
-                                />
-                            </div>
+                            {
+                                !isRecurring && (
+                                    <div className="field">
+                                        <label htmlFor="date">Date</label>
+                                        <Calendar
+                                            id="date"
+                                            value={date.toDate()}
+                                            onChange={(e) => setDate(dayjs(e.value))}
+                                            dateFormat="yy-mm-dd"
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                )
+                            }
                             <div className="flex justify-content-end mt-6">
                                 <Button text severity="danger" type="button" label="Cancel" onClick={onClose} />
                                 <Button type="submit" label={selectedExpense ? "Update Expense" : "Add Expense"} icon="pi pi-plus" />

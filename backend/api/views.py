@@ -25,7 +25,7 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Expense.objects.filter(user=self.request.user)
+        return Expense.objects.filter(user=self.request.user, is_recurring=False)
 
     def perform_create(self, serializer):
         category_name = self.request.data.get('category_name')

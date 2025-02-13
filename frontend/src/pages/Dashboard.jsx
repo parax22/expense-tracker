@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import api from "../api";
 import Expense from "../components/Expense";
-import { Button, Card, Dialog, ProgressSpinner } from "../ui";
+import { Button, Dialog, ProgressSpinner, Carousel } from "../ui";
 import SnackbarAlert from "../components/SnackbarAlert";
 import ExpenseForm from "../components/ExpenseForm";
-
+import dayjs from "dayjs";
 function Dashboard() {
     const preferredCurrency = localStorage.getItem("preferredCurrency") || "USD";
 
     const [open, setOpen] = useState(false);
     const [expenses, setExpenses] = useState([]);
     const [recurringExpenses, setRecurringExpenses] = useState([]);
+    const [recurring, setRecurring] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
@@ -54,8 +55,37 @@ function Dashboard() {
             .finally(() => setLoading(false));
     };
 
-    const editExpense = (id) => {
-        const expense = expenses.find((expense) => expense.id === id);
+    const createExpense = (id) => {
+        const expense = recurringExpenses.find((expense) => expense.id === id);
+        const data = {
+            description: expense.description,
+            category_name: expense.category_name,
+            currency: expense.currency,
+            amount: expense.amount,
+            date: dayjs().format("YYYY-MM-DD"),
+            is_recurring: false
+        };
+
+        api.post("/api/expenses/", data)
+            .then((res) => {
+                if (res.status === 201) {
+                    createAlert("Expense created successfully.", "success");
+                    getExpenses();
+                    getRecurringExpenses();
+                    setOpen(false);
+                }
+                else {
+                    createAlert("Failed to create Expense.", "error");
+                }
+            })
+            .catch((err) => {
+                createAlert(err.message || "Something went wrong!", "error");
+            });
+    };
+
+    const editExpense = (id, isRecurring) => {
+        const expense = isRecurring ? recurringExpenses.find((expense) => expense.id === id) : expenses.find((expense) => expense.id === id);
+        isRecurring ? setRecurring(true) : setRecurring(false);
         setSelectedExpense(expense);
         setOpen(true);
     };
@@ -71,6 +101,7 @@ function Dashboard() {
                     createAlert("Failed to delete Expense.", "error");
                 }
                 getExpenses();
+                getRecurringExpenses();
             })
             .catch((error) => {
                 createAlert(error.message || "Something went wrong!", "error");
@@ -81,16 +112,17 @@ function Dashboard() {
         <>
             <div className="grid">
                 <div className="col-12 lg:col-4">
-                    <div className="p-4 shadow-2 border-round">
+                    <div className="p-4 shadow-2 border-round h-full">
                         <div className="flex flex-wrap justify-content-between align-items-center">
                             <h2>Latest Expense</h2>
                             <Button
                                 text
-                                label="Create New Expense"
+                                label="Add Expense"
                                 icon="pi pi-plus"
                                 onClick={() => {
-                                    setOpen(true);
+                                    setRecurring(false);
                                     setSelectedExpense(null);
+                                    setOpen(true);
                                 }}
                                 style={{ marginTop: '1rem' }}
                             />
@@ -101,7 +133,7 @@ function Dashboard() {
                                     <ProgressSpinner strokeWidth="3" />
                                 </div> :
                                 expenses.length > 0 ? (
-                                    <Expense expense={expenses[expenses.length - 1]} onDelete={deleteExpense} onEdit={editExpense} />
+                                    <Expense expense={expenses[expenses.length - 1]} isRecurring={false} onDelete={deleteExpense} onEdit={editExpense} onCreate={createExpense} />
                                 ) : (
                                     <p>No expenses found.</p>
                                 )
@@ -109,16 +141,17 @@ function Dashboard() {
                     </div>
                 </div>
                 <div className="col-12 lg:col-8">
-                    <div className="p-4 shadow-2 border-round">
+                    <div className="p-4 shadow-2 border-round h-full">
                         <div className="flex flex-wrap justify-content-between align-items-center">
                             <h2>Recurring Expenses</h2>
                             <Button
                             text
-                            label="Create New Recurring Expense"
+                            label="Add Recurring Expense"
                             icon="pi pi-plus"
                             onClick={() => {
-                                setOpen(true);
+                                setRecurring(true);
                                 setSelectedExpense(null);
+                                setOpen(true);
                             }}
                             style={{ marginTop: '1rem' }}
                         />
@@ -129,9 +162,16 @@ function Dashboard() {
                                     <ProgressSpinner strokeWidth="3" />
                                 </div> :
                                 recurringExpenses.length > 0 ? (
-                                    recurringExpenses.map((expense) => (
-                                        <Expense key={expense.id} expense={expense} onDelete={deleteExpense} onEdit={editExpense} />
-                                    ))
+                                    <Carousel 
+                                        className="w-full h-full"
+                                        value={recurringExpenses} 
+                                        numVisible={3} numScroll={1}
+                                        responsiveOptions={[{ breakpoint: '1440px', numVisible: 2, numScroll: 1 }, { breakpoint: '1024px', numVisible: 1, numScroll: 1 }]}
+                                        circular
+                                        itemTemplate={(expense) => (
+                                            <Expense expense={expense} isRecurring={true} onDelete={deleteExpense} onEdit={editExpense} onCreate={createExpense} />
+                                        )}
+                                    />
                                 ) : (
                                     <p>No recurring expenses found.</p>
                                 )
@@ -147,13 +187,18 @@ function Dashboard() {
                     setSelectedExpense(null);
                 }}
                 closable={false}
-                header={selectedExpense ? "Edit Expense" : "Add Expense"}
+                header={selectedExpense ? 
+                    (recurring ? "Edit Recurring Expense" : "Edit Expense") : 
+                    (recurring ? "New Recurring Expense" : "New Expense")
+                }
             >
                 <ExpenseForm
                     getExpenses={getExpenses}
-                    onClose={() => { setOpen(false); setSelectedExpense(null); }}
+                    getRecurringExpenses={getRecurringExpenses}
+                    onClose={() => { setOpen(false); setSelectedExpense(null); setRecurring(false); }}
                     createAlert={createAlert}
                     selectedExpense={selectedExpense}
+                    isRecurring={recurring}
                 />
             </Dialog>
 
