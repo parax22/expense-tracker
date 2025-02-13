@@ -18,62 +18,36 @@ api.interceptors.request.use(
 
 // Solution to Error 401: Unauthorized (Token expired)
 
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-const subscribeTokenRefresh = (cb) => {
-    refreshSubscribers.push(cb);
-};
-
-const onRefreshed = (newToken) => {
-    refreshSubscribers.forEach((cb) => cb(newToken));
-    refreshSubscribers = [];
-};
-
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    response => response,
+    async error => {
         const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-
-            if (isRefreshing) {
-                return new Promise((resolve) => {
-                    subscribeTokenRefresh((newToken) => {
-                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                        resolve(api(originalRequest));
-                    });
-                });
-            }
-
-            isRefreshing = true;
             try {
                 const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-                if (!refreshToken) throw new Error("No refresh token found");
-
-                const { data } = await axios.post(`${baseURL}/api/token/refresh/`, {
-                    refresh: refreshToken,
-                });
-
-                localStorage.setItem(ACCESS_TOKEN, data.access);
-                localStorage.setItem(REFRESH_TOKEN, data.refresh);
-
-                onRefreshed(data.access);
-
-                originalRequest.headers.Authorization = `Bearer ${data.access}`;
-                return api(originalRequest);
-            } catch (err) {
-                console.error("Error refreshing token:", err);
+                if (!refreshToken) {
+                    throw new Error("No refresh token available");
+                }
+                
+                const response = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/api/token/refresh/`,
+                    { refresh: refreshToken }
+                );
+                
+                if (response.status === 200) {
+                    localStorage.setItem(ACCESS_TOKEN, response.data.access);
+                    api.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
+                    originalRequest.headers["Authorization"] = `Bearer ${response.data.access}`;
+                    return api(originalRequest);
+                }
+            } catch (refreshError) {
+                console.error("Refresh token failed", refreshError);
                 localStorage.removeItem(ACCESS_TOKEN);
                 localStorage.removeItem(REFRESH_TOKEN);
                 window.location.href = "/logout";
-                return Promise.reject(err);
-            } finally {
-                isRefreshing = false;
             }
         }
-
         return Promise.reject(error);
     }
 );
