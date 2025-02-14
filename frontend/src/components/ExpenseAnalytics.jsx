@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Chart, Card, Avatar } from '../ui';
-import api from '../api';
 import dayjs from 'dayjs';
+import { CategoryService } from '../services/api/categoryService';
+import { AnalyticService } from '../services/api/analyticService';
 
-function ExpenseAnalytics({ analytics }) {
+function ExpenseAnalytics() {
+    const categoryService = new CategoryService();
+    const analyticsService = new AnalyticService();
+    const [analytics, setAnalytics] = useState([]);
     const preferredCurrency = localStorage.getItem('preferred_currency') || 'USD';
     const [pieChartData, setPieChartData] = useState({});
     const [pieChartOptions, setPieChartOptions] = useState({});
@@ -12,13 +16,23 @@ function ExpenseAnalytics({ analytics }) {
     const [summary, setSummary] = useState([]);
 
     useEffect(() => {
-        api.get('/api/categories/').then(response => {
-            const categoryMap = response.data.reduce((categoriesNames, category) => {
-                categoriesNames[category.id] = category.name;
-                return categoriesNames;
-            }, {});
-            setCategories(categoryMap);
-        });
+        analyticsService.getAll()
+            .then((response) => response.data)
+            .then((data) => {
+                setAnalytics(data);
+            });
+    }, []);
+
+    useEffect(() => {
+        categoryService.getAll()
+            .then((response) => response.data)
+            .then((data) => {
+                const categoryMap = data.reduce((categoriesNames, category) => {
+                    categoriesNames[category.id] = category.name;
+                    return categoriesNames;
+                }, {});
+                setCategories(categoryMap);
+            });
     }, []);
 
     useEffect(() => {

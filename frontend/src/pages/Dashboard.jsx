@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import api from "../api";
 import Expense from "../components/Expense";
 import { Button, Dialog, ProgressSpinner, Carousel } from "../ui";
 import SnackbarAlert from "../components/SnackbarAlert";
 import ExpenseForm from "../components/ExpenseForm";
 import dayjs from "dayjs";
 import ExpenseAnalytics from "../components/ExpenseAnalytics";
+import { ExpenseService } from "../services/api/expenseService";
+import { Expense as ExpenseModel } from "../models/expense";
+
 function Dashboard() {
+    const expenseService = new ExpenseService();
+
     const [open, setOpen] = useState(false);
     const [expenses, setExpenses] = useState([]);
     const [recurringExpenses, setRecurringExpenses] = useState([]);
-    const [analytics, setAnalytics] = useState([]);
     const [recurring, setRecurring] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
@@ -27,23 +30,11 @@ function Dashboard() {
     useEffect(() => {
         getExpenses();
         getRecurringExpenses();
-        getAnalytics();
     }, []);
-
-    const getAnalytics = () => {
-        api.get("/api/analytics/")
-            .then((res) => res.data)
-            .then((data) => {
-                setAnalytics(data);
-            })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
-            });
-    };
 
     const getExpenses = () => {
         setLoading(true);
-        api.get("/api/expenses/")
+        expenseService.getAll()
             .then((res) => res.data)
             .then((data) => {
                 setExpenses(data);
@@ -56,7 +47,7 @@ function Dashboard() {
 
     const getRecurringExpenses = () => {
         setLoading(true);
-        api.get("/api/expenses/recurring/")
+        expenseService.getAllRecurring()
             .then((res) => res.data)
             .then((data) => {
                 setRecurringExpenses(data);
@@ -69,16 +60,9 @@ function Dashboard() {
 
     const createExpense = (id) => {
         const expense = recurringExpenses.find((expense) => expense.id === id);
-        const data = {
-            description: expense.description,
-            category_name: expense.category_name,
-            currency: expense.currency,
-            amount: expense.amount,
-            date: dayjs().format("YYYY-MM-DD"),
-            is_recurring: false
-        };
+        const data = new ExpenseModel(expense.description, expense.category_name, expense.currency, expense.amount, dayjs().format("YYYY-MM-DD"), false);
 
-        api.post("/api/expenses/", data)
+        expenseService.create(data)
             .then((res) => {
                 if (res.status === 201) {
                     createAlert("Expense created successfully.", "success");
@@ -103,8 +87,7 @@ function Dashboard() {
     };
 
     const deleteExpense = (id) => {
-        api
-            .delete(`/api/expenses/delete/${id}/`)
+        expenseService.delete(id)
             .then((res) => {
                 if (res.status === 204) {
                     createAlert("Expense deleted!", "success");
@@ -191,7 +174,7 @@ function Dashboard() {
                     </div>
                 </div>
                 <div className="col-12">
-                        <ExpenseAnalytics analytics={analytics} />
+                        <ExpenseAnalytics/>
                 </div>
             </div>
 

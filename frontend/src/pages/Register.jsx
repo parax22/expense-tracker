@@ -1,7 +1,7 @@
 import AuthenticationForm from "../components/AuthenticationForm";
 
 function Register() {
-    return <AuthenticationForm route="/api/user/register/" method="register" />
+    return <AuthenticationForm method="register" />
 }
 
 export default Register;

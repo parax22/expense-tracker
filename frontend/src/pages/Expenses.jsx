@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button, DataTable, Column, Dialog, ProgressSpinner } from "../ui";
-import api from "../api";
 import SnackbarAlert from "../components/SnackbarAlert";
 import ExpenseForm from "../components/ExpenseForm";
+import { ExpenseService } from "../services/api/expenseService";
 
 function Expenses() {
+    const expenseService = new ExpenseService();
+
     useEffect(() => {
         getExpenses();
     }, []);
@@ -25,13 +27,13 @@ function Expenses() {
 
     const getExpenses = () => {
         setLoading(true);
-        api.get("/api/expenses/")
-            .then((res) => res.data)
+        expenseService.getAll()
+            .then((response) => response.data)
             .then((data) => {
                 setExpenses(data);
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                createAlert(error.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
     };
@@ -43,19 +45,14 @@ function Expenses() {
     };
 
     const deleteExpense = (id) => {
-        api
-            .delete(`/api/expenses/delete/${id}/`)
-            .then((res) => {
-                if (res.status === 204) {
-                    createAlert("Expense deleted!", "success");
-                } else {
-                    createAlert("Failed to delete Expense.", "error");
-                }
+        expenseService.delete(id)
+            .then(() => {
+                createAlert("Expense deleted successfully.", "success");
                 getExpenses();
             })
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
-            });
+                createAlert(error.message || "Failed to delete Expense.", "error");
+            })
     };
 
     const exportToCSV = () => {
@@ -70,9 +67,9 @@ function Expenses() {
                 expense.date
             ])
         ]
-        .map(e => e.join(","))
-        .join("\n");
-        
+            .map(e => e.join(","))
+            .join("\n");
+
         const blob = new Blob([csvContent], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -109,18 +106,17 @@ function Expenses() {
                     <h2>Expenses</h2>
                     <div>
                         <Button text label="Add Expense" icon="pi pi-plus" onClick={() => setOpen(true)} />
-                        <Button label="Export" icon="pi pi-download" onClick={() => exportToCSV() }/> 
+                        <Button label="Export" icon="pi pi-download" onClick={() => exportToCSV()} />
                     </div>
-                    
                 </div>
                 {
                     loading ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div className="flex justify-content-center align-items-center">
                             <ProgressSpinner strokeWidth="4" />
                         </div>
                     ) :
-                        <DataTable 
-                            value={expenses} 
+                        <DataTable
+                            value={expenses}
                             paginator
                             rows={10}
                             rowsPerPageOptions={[10, 15, 20, 25, 50]}
@@ -145,7 +141,7 @@ function Expenses() {
                     setSelectedExpense(null);
                 }}
                 closable={false}
-                header= { selectedExpense ? "Edit Expense" : "Add Expense" }
+                header={selectedExpense ? "Edit Expense" : "Add Expense"}
             >
                 <ExpenseForm
                     getExpenses={getExpenses}

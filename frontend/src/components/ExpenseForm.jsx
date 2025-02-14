@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Button, Card, ProgressSpinner, InputText, Dropdown, Calendar } from "../ui";
-import api from "../api";
+import { Button, ProgressSpinner, InputText, Dropdown, Calendar } from "../ui";
 import dayjs from "dayjs";
+import { ExpenseService } from "../services/api/expenseService";
+import { Expense } from "../models/expense";
 
 function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, selectedExpense, isRecurring }) {
+    const expenseService = new ExpenseService();
     const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
 
     const [loading, setLoading] = useState(false);
@@ -63,14 +65,7 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
             return;
         }
 
-        const data = { 
-            description, 
-            category_name: category,
-            currency,
-            amount,
-            date: date.format("YYYY-MM-DD"),
-            is_recurring: isRecurring
-        };
+        const data = new Expense(description, category, currency, amount, date.format("YYYY-MM-DD"), isRecurring);
 
         if (selectedExpense) {
             updateExpense(selectedExpense.id, data);
@@ -82,20 +77,20 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
 
     const createExpense = (data) => {
         setLoading(true);
-        api.post("/api/expenses/", data)
-            .then((res) => {
-                if (res.status === 201) {
-                    createAlert("Expense created successfully.", "success");
+        expenseService.create(data)
+            .then((response) => {
+                if (response.status === 201) {
+                    createAlert("Expense created!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     onClose();
-                    resetForm();
-                } else {
+                }
+                else {
                     createAlert("Failed to create Expense.", "error");
                 }
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                createAlert(error.message || "Something went wrong!", "error");
             })
             .finally(() => {
                 setLoading(false);
@@ -104,14 +99,13 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
 
     const updateExpense = (id, data) => {
         setLoading(true);
-        api.put(`/api/expenses/update/${id}/`, data)
-            .then((res) => {
-                if (res.status === 200) {
+        expenseService.update(id, data)
+            .then((response) => {
+                if (response.status === 200) {
                     createAlert("Expense updated!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     onClose();
-                    resetForm();
                 }
                 else {
                     createAlert("Failed to update Expense.", "error");

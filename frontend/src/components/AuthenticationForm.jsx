@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { InputText, Button, ProgressSpinner, FloatLabel, Password } from "../ui";
-import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import { InputText, Button, Password } from "../ui";
+import { AuthService } from "../services/api/authService";
+import { SettingService } from "../services/api/settingService";
 import SnackbarAlert from "../components/SnackbarAlert";
+import { User } from "../models/user";
 
-
-function AuthenticationForm({ route, method }) {
+function AuthenticationForm({ method }) {
+    const authService = new AuthService();
+    const settingService = new SettingService();
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -28,15 +30,16 @@ function AuthenticationForm({ route, method }) {
         setLoading(true);
 
         try {
-            const res = await api.post(route, { username, password });
             if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access);
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-
-                await getSettings();
+                await authService.login(new User(username, password));
+                getSettings();
                 navigate("/");
             } else {
-                navigate("/login");
+                authService.register(new User(username, password))
+                    .then(() => {
+                        navigate("/login");
+                        createAlert("Account created successfully!", "success");
+                    }); 
             }
         } catch (error) {
             createAlert(error.message || "Something went wrong!", "error");
@@ -46,14 +49,11 @@ function AuthenticationForm({ route, method }) {
     };
 
     const getSettings = () => {
-        api.get("/api/settings/")
-            .then((res) => res.data)
-            .then((data) => {
-                localStorage.setItem("preferred_currency", data[0].preferred_currency || 'USD');
-            })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
-            });
+        settingService.getAll()
+            .catch((error) => {
+                createAlert(error.message || "Something went wrong!", "error");
+            }
+        );
     };
 
     return (

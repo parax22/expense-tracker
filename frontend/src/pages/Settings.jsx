@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button, ProgressSpinner, Card, Dropdown } from "../ui";
-import api from "../api";
 import SnackbarAlert from "../components/SnackbarAlert";
+import { SettingService } from "../services/api/settingService";
+import { Setting } from "../models/setting";
+import { PREF_CURRENCY } from "../constants";
 
 function Settings() {
+    const settingService = new SettingService();
     const [currency, setCurrency] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -18,7 +21,7 @@ function Settings() {
     };
 
     useEffect(() => {
-        const storedCurrency = localStorage.getItem("preferred_currency");
+        const storedCurrency = localStorage.getItem(PREF_CURRENCY);
         if (storedCurrency) {
             setCurrency(storedCurrency);
         } else {
@@ -28,11 +31,9 @@ function Settings() {
     
 
     const getSettings = () => {
-        api.get("/api/settings/")
-            .then((res) => res.data)
+        settingService.getAll()
             .then((data) => {
-                setCurrency(data[0].preferred_currency || 'USD');
-                localStorage.setItem("preferred_currency", data[0].preferred_currency || 'USD');
+                setCurrency(data.preferred_currency);
             })
             .catch((err) => {
                 createAlert(err.message || "Something went wrong!", "error");
@@ -41,7 +42,7 @@ function Settings() {
 
     const handleSave = () => {
         setLoading(true);
-        api.put("/api/settings/update/", { preferred_currency: currency })
+        settingService.update(new Setting(currency))
             .then(() => {
                 getSettings();
             })
@@ -55,7 +56,7 @@ function Settings() {
     };
 
     const handleCancel = () => {
-        const storedCurrency = localStorage.getItem("preferred_currency");
+        const storedCurrency = localStorage.getItem(PREF_CURRENCY);
         setCurrency(storedCurrency || "USD");
     };
 
@@ -101,5 +102,4 @@ function Settings() {
         </Card>
     );
 }
-
 export default Settings;

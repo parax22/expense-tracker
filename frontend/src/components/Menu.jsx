@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN } from "../constants";
 import { Avatar, Button, Menubar } from "../ui";
 import icon from "../assets/expense.ico";
 function Menu() {
   const navigate = useNavigate();
-  const [drawerVisible, setDrawerVisible] = useState(false);
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN);
 
   if (!isLoggedIn) return null;
