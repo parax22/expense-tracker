@@ -15,3 +15,4 @@ export { FloatLabel } from "primereact/floatlabel";
 export { Password } from "primereact/password";
 export { Menubar } from "primereact/menubar";
 export { Carousel } from "primereact/carousel";
+export { Chart } from "primereact/chart";

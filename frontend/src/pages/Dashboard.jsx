@@ -5,12 +5,12 @@ import { Button, Dialog, ProgressSpinner, Carousel } from "../ui";
 import SnackbarAlert from "../components/SnackbarAlert";
 import ExpenseForm from "../components/ExpenseForm";
 import dayjs from "dayjs";
+import ExpenseAnalytics from "../components/ExpenseAnalytics";
 function Dashboard() {
-    const preferredCurrency = localStorage.getItem("preferredCurrency") || "USD";
-
     const [open, setOpen] = useState(false);
     const [expenses, setExpenses] = useState([]);
     const [recurringExpenses, setRecurringExpenses] = useState([]);
+    const [analytics, setAnalytics] = useState([]);
     const [recurring, setRecurring] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
@@ -27,13 +27,14 @@ function Dashboard() {
     useEffect(() => {
         getExpenses();
         getRecurringExpenses();
+        getAnalytics();
     }, []);
 
     const getAnalytics = () => {
         api.get("/api/analytics/")
             .then((res) => res.data)
             .then((data) => {
-                console.log(data);
+                setAnalytics(data);
             })
             .catch((err) => {
                 createAlert(err.message || "Something went wrong!", "error");
@@ -123,8 +124,8 @@ function Dashboard() {
         <>
             <div className="grid">
                 <div className="col-12 lg:col-4">
-                    <div className="p-4 shadow-2 border-round h-full">
-                        <div className="flex flex-wrap justify-content-between align-items-center">
+                    <div className="p-4 border-round h-full">
+                        <div className="flex flex-wrap justify-content-around align-items-center">
                             <h2>Latest Expense</h2>
                             <Button
                                 text
@@ -152,8 +153,8 @@ function Dashboard() {
                     </div>
                 </div>
                 <div className="col-12 lg:col-8">
-                    <div className="p-4 shadow-2 border-round h-full">
-                        <div className="flex flex-wrap justify-content-between align-items-center">
+                    <div className="p-4 border-round h-full">
+                        <div className="flex flex-wrap justify-content-around align-items-center">
                             <h2>Recurring Expenses</h2>
                             <Button
                             text
@@ -169,7 +170,7 @@ function Dashboard() {
                         </div>
                         {
                             loading ?
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                <div className="flex justify-content-center align-items-center">
                                     <ProgressSpinner strokeWidth="3" />
                                 </div> :
                                 recurringExpenses.length > 0 ? (
@@ -189,7 +190,9 @@ function Dashboard() {
                         }
                     </div>
                 </div>
-                <Button text label="Get Analytics" onClick={getAnalytics} />
+                <div className="col-12">
+                        <ExpenseAnalytics analytics={analytics} />
+                </div>
             </div>
 
             <Dialog
