@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import Expense from "../components/Expense";
-import { Button, Dialog, ProgressSpinner, Carousel, Toast } from "../ui";
+import LastExpense from "../components/dashboard/LastExpense";
+import ExpenseForm from "../components/common/ExpenseForm";
+import RecurringExpenses from "../components/dashboard/RecurringExpenses";
+import ExpenseAnalytics from "../components/dashboard/ExpenseAnalytics";
+import { Dialog, Toast } from "../ui";
 import { useToast } from "../hooks/useToast";
-import ExpenseForm from "../components/ExpenseForm";
 import dayjs from "dayjs";
-import ExpenseAnalytics from "../components/ExpenseAnalytics";
 import { ExpenseService } from "../services/api/expenseService";
 import { Expense as ExpenseModel } from "../models/expense";
+
 
 function Dashboard() {
     const expenseService = new ExpenseService();
@@ -99,74 +101,29 @@ function Dashboard() {
         <>
             <div className="grid">
                 <div className="col-12 lg:col-4">
-                    <div className="p-4 border-round h-full">
-                        <div className="flex flex-wrap justify-content-around align-items-center">
-                            <h2>Latest Expense</h2>
-                            <Button
-                                text
-                                label="Add Expense"
-                                icon="pi pi-plus"
-                                onClick={() => {
-                                    setRecurring(false);
-                                    setSelectedExpense(null);
-                                    setOpen(true);
-                                }}
-                                style={{ marginTop: '1rem' }}
-                            />
-                        </div>
-                        {
-                            loading ?
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <ProgressSpinner strokeWidth="3" />
-                                </div> :
-                                expenses.length > 0 ? (
-                                    <Expense expense={expenses[expenses.length - 1]} isRecurring={false} onDelete={deleteExpense} onEdit={editExpense} onCreate={createExpense} />
-                                ) : (
-                                    <p>No expenses found.</p>
-                                )
-                        }
-                    </div>
+                    <LastExpense
+                        expense={expenses[expenses.length - 1]}
+                        onDelete={deleteExpense}
+                        onEdit={editExpense}
+                        onCreate={() => {
+                            setRecurring(false);
+                            setSelectedExpense(null);
+                            setOpen(true);
+                        }}
+                        loading={loading}
+                    />
                 </div>
                 <div className="col-12 lg:col-8">
-                    <div className="p-4 border-round h-full">
-                        <div className="flex flex-wrap justify-content-around align-items-center">
-                            <h2>Recurring Expenses</h2>
-                            <Button
-                            text
-                            label="Add Recurring Expense"
-                            icon="pi pi-plus"
-                            onClick={() => {
-                                setRecurring(true);
-                                setSelectedExpense(null);
-                                setOpen(true);
-                            }}
-                            style={{ marginTop: '1rem' }}
-                        />
-                        </div>
-                        {
-                            loading ?
-                                <div className="flex justify-content-center align-items-center">
-                                    <ProgressSpinner strokeWidth="3" />
-                                </div> :
-                                recurringExpenses.length > 0 ? (
-                                    <Carousel 
-                                        className="w-full h-full"
-                                        value={recurringExpenses} 
-                                        numVisible={3} numScroll={1}
-                                        responsiveOptions={[{ breakpoint: '1440px', numVisible: 2, numScroll: 1 }, { breakpoint: '1024px', numVisible: 1, numScroll: 1 }]}
-                                        circular
-                                        itemTemplate={(expense) => (
-                                            <Expense expense={expense} isRecurring={true} onDelete={deleteExpense} onEdit={editExpense} onCreate={createExpense} />
-                                        )}
-                                    />
-                                ) : (
-                                    <p>No recurring expenses found.</p>
-                                )
-                        }
-                    </div>
+                    <RecurringExpenses
+                        expenses={recurringExpenses}
+                        onDelete={deleteExpense}
+                        onEdit={editExpense}
+                        onCreate={createExpense}
+                        loading={loading}
+                    />
                 </div>
                 <div className="col-12">
-                        <ExpenseAnalytics/>
+                    <ExpenseAnalytics />
                 </div>
             </div>
 
@@ -177,8 +134,8 @@ function Dashboard() {
                     setSelectedExpense(null);
                 }}
                 closable={false}
-                header={selectedExpense ? 
-                    (recurring ? "Edit Recurring Expense" : "Edit Expense") : 
+                header={selectedExpense ?
+                    (recurring ? "Edit Recurring Expense" : "Edit Expense") :
                     (recurring ? "New Recurring Expense" : "New Expense")
                 }
             >

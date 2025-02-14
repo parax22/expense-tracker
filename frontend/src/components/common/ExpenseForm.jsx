@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Button, ProgressSpinner, InputText, Dropdown, Calendar } from "../ui";
+import { Button, ProgressSpinner, InputText, Dropdown, Calendar } from "../../ui";
 import dayjs from "dayjs";
-import { ExpenseService } from "../services/api/expenseService";
-import { Expense } from "../models/expense";
+import { ExpenseService } from "../../services/api/expenseService";
+import { Expense } from "../../models/expense";
 
 function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, selectedExpense, isRecurring }) {
     const expenseService = new ExpenseService();

@@ -1,4 +1,4 @@
-import AuthenticationForm from "../components/AuthenticationForm";
+import AuthenticationForm from "../components/auth/AuthenticationForm";
 
 function Login() {
     return <AuthenticationForm method="login" />

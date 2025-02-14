@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Menu from "./Menu";
-import { AuthService } from "../services/api/authService";
+import Menu from "../common/Menu";
+import { AuthService } from "../../services/api/authService";
 
 function ProtectedRoute({ children }) {
     const authService = new AuthService();

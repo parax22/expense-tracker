@@ -4,7 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Expenses from "./pages/Expenses";
 import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/themes/lara-dark-green/theme.css";

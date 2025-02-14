@@ -1,4 +1,4 @@
-import { Card, Button } from '../ui.js';
+import { Card, Button } from '../../ui';
 
 function Expense({ expense, isRecurring, onCreate, onDelete, onEdit }) {
     const footer = (

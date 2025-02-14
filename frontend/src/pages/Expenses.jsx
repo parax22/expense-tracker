@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button, DataTable, Column, Dialog, ProgressSpinner, Toast } from "../ui";
-import ExpenseForm from "../components/ExpenseForm";
+import ExpenseForm from "../components/common/ExpenseForm";
 import { ExpenseService } from "../services/api/expenseService";
 import { useToast } from "../hooks/useToast";
 

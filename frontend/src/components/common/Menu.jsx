@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN } from "../constants";
-import { Avatar, Button, Menubar } from "../ui";
-import icon from "../assets/expense.ico";
+import { ACCESS_TOKEN } from "../../constants";
+import { Avatar, Button, Menubar } from "../../ui";
+import icon from "../../assets/expense.ico";
 function Menu() {
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN);

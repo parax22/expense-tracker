@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { InputText, Button, Password, Toast } from "../ui";
-import { AuthService } from "../services/api/authService";
-import { SettingService } from "../services/api/settingService";
-import { useToast } from "../hooks/useToast";
-import { User } from "../models/user";
+import { InputText, Button, Password, Toast } from "../../ui";
+import { AuthService } from "../../services/api/authService";
+import { SettingService } from "../../services/api/settingService";
+import { useToast } from "../../hooks/useToast";
+import { User } from "../../models/user";
 
 function AuthenticationForm({ method }) {
     const authService = new AuthService();

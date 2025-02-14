@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Chart, Card, Avatar } from '../ui';
+import { Chart, Card, Avatar } from '../../ui';
 import dayjs from 'dayjs';
-import { CategoryService } from '../services/api/categoryService';
-import { AnalyticService } from '../services/api/analyticService';
+import { CategoryService } from '../../services/api/categoryService';
+import { AnalyticService } from '../../services/api/analyticService';
 
 function ExpenseAnalytics() {
     const categoryService = new CategoryService();
