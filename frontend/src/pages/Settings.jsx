@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Button, ProgressSpinner, Card, Dropdown } from "../ui";
-import SnackbarAlert from "../components/SnackbarAlert";
+import { Button, ProgressSpinner, Card, Dropdown, Toast } from "../ui";
+import { useToast } from "../hooks/useToast";
 import { SettingService } from "../services/api/settingService";
 import { Setting } from "../models/setting";
 import { PREF_CURRENCY } from "../constants";
@@ -9,16 +9,7 @@ function Settings() {
     const settingService = new SettingService();
     const [currency, setCurrency] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [severity, setSeverity] = useState('');
-
-    const createAlert = (message, severity) => {
-        setAlertMessage(message);
-        setSeverity(severity);
-        setOpenSnackbar(true);
-    };
+    const { showToast, toastRef } = useToast();
 
     useEffect(() => {
         const storedCurrency = localStorage.getItem(PREF_CURRENCY);
@@ -35,8 +26,8 @@ function Settings() {
             .then((data) => {
                 setCurrency(data.preferred_currency);
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                showToast(error.message || "Failed to fetch settings.", "error");
             });
     };
 
@@ -47,10 +38,10 @@ function Settings() {
                 getSettings();
             })
             .then(() => {
-                createAlert("Settings updated successfully!", "success");
+                showToast("Settings updated successfully!", "success");
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                showToast(error.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
     };
@@ -93,12 +84,7 @@ function Settings() {
                 </div>
             )}
 
-            <SnackbarAlert
-                open={openSnackbar}
-                severity={severity}
-                message={alertMessage}
-                onClose={() => setOpenSnackbar(false)}
-            />
+            <Toast ref={toastRef} position="bottom-right" />
         </Card>
     );
 }

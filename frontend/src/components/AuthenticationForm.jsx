@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { InputText, Button, Password } from "../ui";
+import { InputText, Button, Password, Toast } from "../ui";
 import { AuthService } from "../services/api/authService";
 import { SettingService } from "../services/api/settingService";
-import SnackbarAlert from "../components/SnackbarAlert";
+import { useToast } from "../hooks/useToast";
 import { User } from "../models/user";
 
 function AuthenticationForm({ method }) {
@@ -12,15 +12,7 @@ function AuthenticationForm({ method }) {
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [alertMessage, setAlertMessage] = useState('');
-    const [severity, setSeverity] = useState('');
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-
-    const createAlert = (message, severity) => {
-        setAlertMessage(message);
-        setSeverity(severity);
-        setOpenSnackbar(true);
-    };
+    const { showToast, toastRef } = useToast();
 
     const navigate = useNavigate();
     const name = method === "login" ? "Login" : "Register";
@@ -38,11 +30,11 @@ function AuthenticationForm({ method }) {
                 authService.register(new User(username, password))
                     .then(() => {
                         navigate("/login");
-                        createAlert("Account created successfully!", "success");
+                        showToast("Account created successfully!", "success");
                     }); 
             }
         } catch (error) {
-            createAlert(error.message || "Something went wrong!", "error");
+            showToast(error.message || "Something went wrong!", "error");
         } finally {
             setLoading(false);
         }
@@ -51,7 +43,7 @@ function AuthenticationForm({ method }) {
     const getSettings = () => {
         settingService.getAll()
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
+                showToast(error.message || "Something went wrong!", "error");
             }
         );
     };
@@ -92,12 +84,7 @@ function AuthenticationForm({ method }) {
                     </form>
                 </div>
             </div>
-            <SnackbarAlert
-                open={openSnackbar}
-                severity={severity}
-                message={alertMessage}
-                onClose={() => setOpenSnackbar(false)}
-            />
+            <Toast ref={toastRef} position="bottom-right" />
         </>
     );
 }

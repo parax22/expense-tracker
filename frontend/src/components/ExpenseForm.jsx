@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { ExpenseService } from "../services/api/expenseService";
 import { Expense } from "../models/expense";
 
-function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, selectedExpense, isRecurring }) {
+function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, selectedExpense, isRecurring }) {
     const expenseService = new ExpenseService();
     const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
 
@@ -61,11 +61,11 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
         e.preventDefault();
 
         if (errors.description || errors.category || errors.amount) {
-            createAlert("Please fix the errors before submitting.", "error");
+            showToast("Please fix the errors before submitting.", "error");
             return;
         }
 
-        const data = new Expense(description, category, currency, amount, date.format("YYYY-MM-DD"), isRecurring);
+        const data = new Expense(-1, -1, description, category, amount, currency, date.format("YYYY-MM-DD"), isRecurring);
 
         if (selectedExpense) {
             updateExpense(selectedExpense.id, data);
@@ -80,17 +80,17 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
         expenseService.create(data)
             .then((response) => {
                 if (response.status === 201) {
-                    createAlert("Expense created!", "success");
+                    showToast("Expense created!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     onClose();
                 }
                 else {
-                    createAlert("Failed to create Expense.", "error");
+                    showToast("Failed to create Expense.", "error");
                 }
             })
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
+                showToast(error.message || "Something went wrong!", "error");
             })
             .finally(() => {
                 setLoading(false);
@@ -102,17 +102,17 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, createAlert, 
         expenseService.update(id, data)
             .then((response) => {
                 if (response.status === 200) {
-                    createAlert("Expense updated!", "success");
+                    showToast("Expense updated!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     onClose();
                 }
                 else {
-                    createAlert("Failed to update Expense.", "error");
+                    showToast("Failed to update Expense.", "error");
                 }
             })
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
+                showToast(error.message || "Something went wrong!", "error");
             })
             .finally(() => {
                 setLoading(false);

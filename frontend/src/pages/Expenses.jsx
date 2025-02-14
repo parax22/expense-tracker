@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Button, DataTable, Column, Dialog, ProgressSpinner } from "../ui";
-import SnackbarAlert from "../components/SnackbarAlert";
+import { Button, DataTable, Column, Dialog, ProgressSpinner, Toast } from "../ui";
 import ExpenseForm from "../components/ExpenseForm";
 import { ExpenseService } from "../services/api/expenseService";
+import { useToast } from "../hooks/useToast";
 
 function Expenses() {
     const expenseService = new ExpenseService();
@@ -13,17 +13,9 @@ function Expenses() {
 
     const [loading, setLoading] = useState(false);
     const [expenses, setExpenses] = useState([]);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [severity, setSeverity] = useState('');
-    const [openSnackbar, setOpenSnackbar] = useState(false);
     const [open, setOpen] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
-
-    const createAlert = (message, severity) => {
-        setAlertMessage(message);
-        setSeverity(severity);
-        setOpenSnackbar(true);
-    };
+    const { showToast, toastRef } = useToast();
 
     const getExpenses = () => {
         setLoading(true);
@@ -33,7 +25,7 @@ function Expenses() {
                 setExpenses(data);
             })
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
+                showToast(error.message || "Failed to fetch Expenses.", "error");
             })
             .finally(() => setLoading(false));
     };
@@ -47,11 +39,11 @@ function Expenses() {
     const deleteExpense = (id) => {
         expenseService.delete(id)
             .then(() => {
-                createAlert("Expense deleted successfully.", "success");
+                showToast("Expense deleted!", "success");
                 getExpenses();
             })
             .catch((error) => {
-                createAlert(error.message || "Failed to delete Expense.", "error");
+                showToast(error.message || "Failed to delete Expense.", "error");
             })
     };
 
@@ -146,17 +138,12 @@ function Expenses() {
                 <ExpenseForm
                     getExpenses={getExpenses}
                     onClose={() => { setOpen(false); setSelectedExpense(null); }}
-                    createAlert={createAlert}
+                    showToast={showToast}
                     selectedExpense={selectedExpense}
                 />
             </Dialog>
 
-            <SnackbarAlert
-                open={openSnackbar}
-                severity={severity}
-                message={alertMessage}
-                onClose={() => setOpenSnackbar(false)}
-            />
+            <Toast ref={toastRef} position="bottom-right" />
         </>
     );
 }

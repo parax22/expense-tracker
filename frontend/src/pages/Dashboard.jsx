@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Expense from "../components/Expense";
-import { Button, Dialog, ProgressSpinner, Carousel } from "../ui";
-import SnackbarAlert from "../components/SnackbarAlert";
+import { Button, Dialog, ProgressSpinner, Carousel, Toast } from "../ui";
+import { useToast } from "../hooks/useToast";
 import ExpenseForm from "../components/ExpenseForm";
 import dayjs from "dayjs";
 import ExpenseAnalytics from "../components/ExpenseAnalytics";
@@ -17,15 +17,7 @@ function Dashboard() {
     const [recurring, setRecurring] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [severity, setSeverity] = useState('');
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-
-    const createAlert = (message, severity) => {
-        setAlertMessage(message);
-        setSeverity(severity);
-        setOpenSnackbar(true);
-    };
+    const { showToast, toastRef } = useToast();
 
     useEffect(() => {
         getExpenses();
@@ -35,12 +27,12 @@ function Dashboard() {
     const getExpenses = () => {
         setLoading(true);
         expenseService.getAll()
-            .then((res) => res.data)
+            .then((response) => response.data)
             .then((data) => {
                 setExpenses(data);
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                showToast(error.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
     };
@@ -48,34 +40,34 @@ function Dashboard() {
     const getRecurringExpenses = () => {
         setLoading(true);
         expenseService.getAllRecurring()
-            .then((res) => res.data)
+            .then((response) => response.data)
             .then((data) => {
                 setRecurringExpenses(data);
             })
-            .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+            .catch((error) => {
+                showToast(error.message || "Something went wrong!", "error");
             })
             .finally(() => setLoading(false));
     };
 
     const createExpense = (id) => {
         const expense = recurringExpenses.find((expense) => expense.id === id);
-        const data = new ExpenseModel(expense.description, expense.category_name, expense.currency, expense.amount, dayjs().format("YYYY-MM-DD"), false);
+        const data = new ExpenseModel(-1, -1, expense.description, expense.category_name, expense.amount, expense.currency, dayjs().format("YYYY-MM-DD"), false);
 
         expenseService.create(data)
-            .then((res) => {
-                if (res.status === 201) {
-                    createAlert("Expense created successfully.", "success");
+            .then((response) => {
+                if (response.status === 201) {
+                    showToast("Expense created!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     setOpen(false);
                 }
                 else {
-                    createAlert("Failed to create Expense.", "error");
+                    showToast("Failed to create Expense.", "error");
                 }
             })
             .catch((err) => {
-                createAlert(err.message || "Something went wrong!", "error");
+                showToast(err.message || "Something went wrong!", "error");
             });
     };
 
@@ -88,18 +80,18 @@ function Dashboard() {
 
     const deleteExpense = (id) => {
         expenseService.delete(id)
-            .then((res) => {
-                if (res.status === 204) {
-                    createAlert("Expense deleted!", "success");
+            .then((response) => {
+                if (response.status === 204) {
+                    showToast("Expense deleted!", "success");
                 }
                 else {
-                    createAlert("Failed to delete Expense.", "error");
+                    showToast("Failed to delete Expense.", "error");
                 }
                 getExpenses();
                 getRecurringExpenses();
             })
             .catch((error) => {
-                createAlert(error.message || "Something went wrong!", "error");
+                showToast(error.message || "Something went wrong!", "error");
             });
     };
 
@@ -194,18 +186,13 @@ function Dashboard() {
                     getExpenses={getExpenses}
                     getRecurringExpenses={getRecurringExpenses}
                     onClose={() => { setOpen(false); setSelectedExpense(null); setRecurring(false); }}
-                    createAlert={createAlert}
+                    showToast={showToast}
                     selectedExpense={selectedExpense}
                     isRecurring={recurring}
                 />
             </Dialog>
 
-            <SnackbarAlert
-                open={openSnackbar}
-                severity={severity}
-                message={alertMessage}
-                onClose={() => setOpenSnackbar(false)}
-            />
+            <Toast ref={toastRef} position="bottom-right" />
         </>
     );
 }
