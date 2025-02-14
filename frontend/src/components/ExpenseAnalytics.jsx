@@ -4,7 +4,7 @@ import api from '../api';
 import dayjs from 'dayjs';
 
 function ExpenseAnalytics({ analytics }) {
-    const preferredCurrency = localStorage.getItem('preferredCurrency') || 'USD';
+    const preferredCurrency = localStorage.getItem('preferred_currency') || 'USD';
     const [pieChartData, setPieChartData] = useState({});
     const [pieChartOptions, setPieChartOptions] = useState({});
     const [lineChartData, setLineChartData] = useState({});
