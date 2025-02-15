@@ -16,6 +16,7 @@ function ExpenseAnalytics({ expenses }) {
     const [summary, setSummary] = useState([]);
     const [analyticsLoading, setAnalyticsLoading] = useState(true);
     const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [noDataAvailable, setNoDataAvailable] = useState(false);
 
     useEffect(() => {
         setAnalyticsLoading(true);
@@ -23,6 +24,7 @@ function ExpenseAnalytics({ expenses }) {
             .then((response) => response.data)
             .then((data) => {
                 setAnalytics(data);
+                setNoDataAvailable(data.length === 0);
             })
             .finally(() => setAnalyticsLoading(false));
     }, [expenses]);
@@ -51,6 +53,11 @@ function ExpenseAnalytics({ expenses }) {
         const filteredData = analytics.filter(entry =>
             entry.month === currentMonth && entry.year === currentYear
         );
+
+        if (filteredData.length === 0) {
+            setNoDataAvailable(true);
+            return;
+        }
 
         const labels = filteredData.map(entry => categories[entry.category] || 'Desconocido');
         const dataValues = filteredData.map(entry => parseFloat(entry.total_amount));
@@ -142,14 +149,18 @@ function ExpenseAnalytics({ expenses }) {
                     <Card className="m-auto w-12 lg:w-10 md:w-6">
                         <Avatar icon="pi pi-money-bill" size="large"/>
                         <h3>Current Month</h3>
-                        <ul>
-                            {summary.map((item, index) => (
-                                <li className="text-left mb-2" style={{ listStyleType: 'none' }} key={index}>
-                                    <strong>{item.title}: </strong>
-                                    {item.value}
-                                </li>
-                            ))}
-                        </ul>
+                        {noDataAvailable ? (
+                            <p>No data available for the current month.</p>
+                        ) : (
+                            <ul>
+                                {summary.map((item, index) => (
+                                    <li className="text-left mb-2" style={{ listStyleType: 'none' }} key={index}>
+                                        <strong>{item.title}: </strong>
+                                        {item.value}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </Card>
                 </div>
             </div>
@@ -158,11 +169,19 @@ function ExpenseAnalytics({ expenses }) {
                 <div className="grid gap-2 justify-content-center xl:w-12 lg:w-12 md:w-6 sm:w-10 m-auto">
                     <div className='justify-content-center text-center surface-card border-round w-12 lg:w-5 p-2'>
                         <h3>Monthly Categories</h3>
-                        <Chart type="pie" data={pieChartData} options={pieChartOptions} className="w-6 m-auto"/>
+                        {noDataAvailable ? (
+                            <p>No data available for the pie chart.</p>
+                        ) : (
+                            <Chart type="pie" data={pieChartData} options={pieChartOptions} className="w-6 m-auto"/>
+                        )}
                     </div>
                     <div className='justify-content-center text-center surface-card border-round w-12 lg:w-5 p-2'>
                         <h3>Spending Trend (Last 6 Months)</h3>
-                        <Chart type="line" data={lineChartData}/>
+                        {noDataAvailable ? (
+                            <p>No data available for the line chart.</p>
+                        ) : (
+                            <Chart type="line" data={lineChartData}/>
+                        )}
                     </div>
                 </div>
             </div>

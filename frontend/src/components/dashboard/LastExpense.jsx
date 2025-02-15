@@ -18,7 +18,7 @@ function LastExpense({ expense, onDelete, onEdit, onCreate }) {
                 expense ? (
                     <Expense expense={expense} isRecurring={false} onDelete={onDelete} onEdit={onEdit} onCreate={onCreate} />
                 ) : (
-                    <p>No expenses found.</p>
+                    <p className="text-center">No expenses found.</p>
                 )
             }
         </div>

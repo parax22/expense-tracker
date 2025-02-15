@@ -31,7 +31,7 @@ function RecurringExpenses({ expenses, onDelete, onEdit, onCreate }) {
                         )}
                     />
                 ) : (
-                    <p>No recurring expenses found.</p>
+                    <p className="text-center">No recurring expenses found.</p>
                 )
             }
         </div>
