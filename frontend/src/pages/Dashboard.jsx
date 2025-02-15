@@ -18,7 +18,7 @@ function Dashboard() {
     useEffect(() => {
         getExpenses();
         getRecurringExpenses();
-    }, [getExpenses, getRecurringExpenses]);
+    }, []);
 
     const handleCreateExpense = (id) => {
         const expense = recurringExpenses.find((expense) => expense.id === id);
