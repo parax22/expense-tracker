@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button, ProgressSpinner, InputText, Dropdown, Calendar } from "../../ui";
 import dayjs from "dayjs";
-import { ExpenseService } from "../../services/api/expenseService";
+import { useExpense } from "../../hooks/useExpense";
 import { Expense } from "../../models/expense";
 
 function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, selectedExpense, isRecurring }) {
-    const expenseService = new ExpenseService();
+    const { createExpense, editExpense } = useExpense();
     const preferredCurrency = localStorage.getItem("preferred_currency") || "USD";
 
     const [loading, setLoading] = useState(false);
@@ -29,8 +29,7 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, se
             setCurrency(selectedExpense.currency);
             setAmount(selectedExpense.amount);
             setDate(dayjs(selectedExpense.date));
-        }
-        else {
+        } else {
             resetForm();
         }
     }, [selectedExpense]);
@@ -57,7 +56,7 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, se
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (errors.description || errors.category || errors.amount) {
@@ -67,56 +66,34 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, se
 
         const data = new Expense(-1, -1, description, category, amount, currency, date.format("YYYY-MM-DD"), isRecurring);
 
-        if (selectedExpense) {
-            updateExpense(selectedExpense.id, data);
-        } else {
-            createExpense(data);
-        }
-        resetForm();
-    };
-
-    const createExpense = (data) => {
         setLoading(true);
-        expenseService.create(data)
-            .then((response) => {
-                if (response.status === 201) {
-                    showToast("Expense created!", "success");
-                    getExpenses();
-                    getRecurringExpenses();
-                    onClose();
-                }
-                else {
-                    showToast("Failed to create Expense.", "error");
-                }
-            })
-            .catch((error) => {
-                showToast(error.message || "Something went wrong!", "error");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    };
-
-    const updateExpense = (id, data) => {
-        setLoading(true);
-        expenseService.update(id, data)
-            .then((response) => {
-                if (response.status === 200) {
+        try {
+            if (selectedExpense) {
+                const success = await editExpense(selectedExpense.id, data);
+                if (success) {
                     showToast("Expense updated!", "success");
                     getExpenses();
                     getRecurringExpenses();
                     onClose();
-                }
-                else {
+                } else {
                     showToast("Failed to update Expense.", "error");
                 }
-            })
-            .catch((error) => {
-                showToast(error.message || "Something went wrong!", "error");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            } else {
+                const success = await createExpense(data);
+                if (success) {
+                    showToast("Expense created!", "success");
+                    getExpenses();
+                    getRecurringExpenses();
+                    onClose();
+                } else {
+                    showToast("Failed to create Expense.", "error");
+                }
+            }
+        } catch (error) {
+            showToast(error.message || "Something went wrong!", "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const resetForm = () => {
@@ -134,87 +111,83 @@ function ExpenseForm({ getExpenses, getRecurringExpenses, onClose, showToast, se
 
     return (
         <div>
-            {
-                loading ? (
-                    <div className="flex justify-content-center align-items-center h-6 w-6 m-auto ">
-                        <ProgressSpinner strokeWidth="4" />
-                    </div>
-                ) : (
-                    <div>
-                        <form onSubmit={handleSubmit}>
-                            <div className="field">
-                                <label htmlFor="description">Description</label>
-                                <InputText
-                                    id="description"
-                                    value={description}
-                                    onChange={handleDescriptionChange}
-                                    className={`w-full ${errors.description ? 'p-invalid' : ''}`}
-                                    required
-                                />
-                                {errors.description && <small className="p-error">{errors.description}</small>}
-                            </div>
-                            <div className="field">
-                                <label htmlFor="category">Category</label>
-                                <InputText
-                                    id="category"
-                                    value={category}
-                                    onChange={handleCategoryChange}
-                                    className={`w-full ${errors.category ? 'p-invalid' : ''}`}
-                                    required
-                                />
-                                {errors.category && <small className="p-error">{errors.category}</small>}
-                            </div>
-                            <div className="grid align-center">
-                                <div className="col-8">
-                                    <div className="field">
-                                        <label htmlFor="amount">Amount</label>
-                                        <InputText
-                                            id="amount"
-                                            value={amount}
-                                            onChange={handleAmountChange}
-                                            className={`w-full ${errors.amount ? 'p-invalid' : ''}`}
-                                            required
-                                        />
-                                        {errors.amount && <small className="p-error">{errors.amount}</small>}
-                                    </div>
-                                </div>
-                                <div className="col-4">
-                                    <div className="field">
-                                        <label htmlFor="currency">Currency</label>
-                                        <Dropdown
-                                            id="currency"
-                                            value={currency}
-                                            options={["USD", "EUR", "GBP", "JPY", "PEN", "ARS", "CLP"]}
-                                            onChange={(e) => setCurrency(e.value)}
-                                            className="w-full"
-                                            required
-                                        />
-                                    </div>
+            {loading ? (
+                <div className="flex justify-content-center align-items-center h-6 w-6 m-auto">
+                    <ProgressSpinner strokeWidth="4" />
+                </div>
+            ) : (
+                <div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="field">
+                            <label htmlFor="description">Description</label>
+                            <InputText
+                                id="description"
+                                value={description}
+                                onChange={handleDescriptionChange}
+                                className={`w-full ${errors.description ? 'p-invalid' : ''}`}
+                                required
+                            />
+                            {errors.description && <small className="p-error">{errors.description}</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="category">Category</label>
+                            <InputText
+                                id="category"
+                                value={category}
+                                onChange={handleCategoryChange}
+                                className={`w-full ${errors.category ? 'p-invalid' : ''}`}
+                                required
+                            />
+                            {errors.category && <small className="p-error">{errors.category}</small>}
+                        </div>
+                        <div className="grid align-center">
+                            <div className="col-8">
+                                <div className="field">
+                                    <label htmlFor="amount">Amount</label>
+                                    <InputText
+                                        id="amount"
+                                        value={amount}
+                                        onChange={handleAmountChange}
+                                        className={`w-full ${errors.amount ? 'p-invalid' : ''}`}
+                                        required
+                                    />
+                                    {errors.amount && <small className="p-error">{errors.amount}</small>}
                                 </div>
                             </div>
-                            {
-                                !isRecurring && (
-                                    <div className="field">
-                                        <label htmlFor="date">Date</label>
-                                        <Calendar
-                                            id="date"
-                                            value={date.toDate()}
-                                            onChange={(e) => setDate(dayjs(e.value))}
-                                            dateFormat="yy-mm-dd"
-                                            className="w-full"
-                                            required
-                                        />
-                                    </div>
-                                )
-                            }
-                            <div className="flex justify-content-end mt-6">
-                                <Button text severity="danger" type="button" label="Cancel" onClick={onClose} />
-                                <Button type="submit" label={selectedExpense ? "Update Expense" : "Add Expense"} icon="pi pi-plus" />
+                            <div className="col-4">
+                                <div className="field">
+                                    <label htmlFor="currency">Currency</label>
+                                    <Dropdown
+                                        id="currency"
+                                        value={currency}
+                                        options={["USD", "EUR", "GBP", "JPY", "PEN", "ARS", "CLP"]}
+                                        onChange={(e) => setCurrency(e.value)}
+                                        className="w-full"
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                )
-            }
+                        </div>
+                        {!isRecurring && (
+                            <div className="field">
+                                <label htmlFor="date">Date</label>
+                                <Calendar
+                                    id="date"
+                                    value={date.toDate()}
+                                    onChange={(e) => setDate(dayjs(e.value))}
+                                    dateFormat="yy-mm-dd"
+                                    className="w-full"
+                                    required
+                                />
+                            </div>
+                        )}
+                        <div className="flex justify-content-end mt-6">
+                            <Button text severity="danger" type="button" label="Cancel" onClick={onClose} />
+                            <Button type="submit" label={selectedExpense ? "Update Expense" : "Add Expense"} icon="pi pi-plus" />
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

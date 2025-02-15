@@ -35,7 +35,7 @@ export class BaseService {
                 if (error.response && error.response.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;
                     try {
-                          if (!refreshToken) {
+                        if (!refreshToken) {
                             throw new Error("No refresh token available");
                         }
 
@@ -76,16 +76,16 @@ export class BaseService {
         return `${this.baseURL}/${this.endpoint}/`;
     }
 
-    getAll(){
+    getAll() {
         return this.http.get(this.endpointPath());
     }
 
-    create(data){
+    create(data) {
         return this.http.post(this.endpointPath(), data);
     }
 
     delete(id) {
-        return this.http.delete(`${this.endpointPath}${id}`);
+        return this.http.delete(`${this.endpointPath()}delete/${id}/`);
     }
 }
 

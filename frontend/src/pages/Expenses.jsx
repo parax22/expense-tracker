@@ -1,50 +1,30 @@
 import { useState, useEffect } from "react";
-import { Button, DataTable, Column, Dialog, ProgressSpinner, Toast } from "../ui";
-import ExpenseForm from "../components/common/ExpenseForm";
-import { ExpenseService } from "../services/api/expenseService";
+import { Button, DataTable, Column, ProgressSpinner, Toast } from "../ui";
+import ExpenseDialog from "../components/common/ExpenseDialog";
 import { useToast } from "../hooks/useToast";
+import { useExpense } from "../hooks/useExpense";
+import { useDialog } from "../hooks/useDialog";
 
 function Expenses() {
-    const expenseService = new ExpenseService();
+    const { expenses, loading, getExpenses, getRecurringExpenses, deleteExpense: deleteExpenseHook } = useExpense();
+    const { open, selectedItem: selectedExpense, openDialog, closeDialog } = useDialog();
+    const { showToast, toastRef } = useToast();
 
     useEffect(() => {
         getExpenses();
     }, []);
 
-    const [loading, setLoading] = useState(false);
-    const [expenses, setExpenses] = useState([]);
-    const [open, setOpen] = useState(false);
-    const [selectedExpense, setSelectedExpense] = useState(null);
-    const { showToast, toastRef } = useToast();
-
-    const getExpenses = () => {
-        setLoading(true);
-        expenseService.getAll()
-            .then((response) => response.data)
-            .then((data) => {
-                setExpenses(data);
-            })
-            .catch((error) => {
-                showToast(error.message || "Failed to fetch Expenses.", "error");
-            })
-            .finally(() => setLoading(false));
-    };
-
     const editExpense = (id) => {
         const expense = expenses.find((expense) => expense.id === id);
-        setSelectedExpense(expense);
-        setOpen(true);
+        openDialog(expense);
     };
 
-    const deleteExpense = (id) => {
-        expenseService.delete(id)
-            .then(() => {
-                showToast("Expense deleted!", "success");
-                getExpenses();
-            })
-            .catch((error) => {
-                showToast(error.message || "Failed to delete Expense.", "error");
-            })
+    const deleteExpense = async (id) => {
+        if (await deleteExpenseHook(id)) {
+            showToast("Expense deleted!", "success");
+        } else {
+            showToast("Failed to delete Expense.", "error");
+        }
     };
 
     const exportToCSV = () => {
@@ -111,7 +91,7 @@ function Expenses() {
                             value={expenses}
                             paginator
                             rows={10}
-                            rowsPerPageOptions={[10, 15, 20, 25, 50]}
+                            rowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
                             totalRecords={expenses.length}
                             emptyMessage="No expenses found."
                         >
@@ -126,22 +106,14 @@ function Expenses() {
                 }
             </div>
 
-            <Dialog
+            <ExpenseDialog
                 visible={open}
-                onHide={() => {
-                    setOpen(false);
-                    setSelectedExpense(null);
-                }}
-                closable={false}
-                header={selectedExpense ? "Edit Expense" : "Add Expense"}
-            >
-                <ExpenseForm
-                    getExpenses={getExpenses}
-                    onClose={() => { setOpen(false); setSelectedExpense(null); }}
-                    showToast={showToast}
-                    selectedExpense={selectedExpense}
-                />
-            </Dialog>
+                onHide={closeDialog}
+                selectedExpense={selectedExpense}
+                getExpenses={getExpenses}
+                getRecurringExpenses={getRecurringExpenses}
+                showToast={showToast}
+            />;
 
             <Toast ref={toastRef} position="bottom-right" />
         </>

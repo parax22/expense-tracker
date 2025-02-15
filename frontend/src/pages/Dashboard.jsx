@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import LastExpense from "../components/dashboard/LastExpense";
-import ExpenseForm from "../components/common/ExpenseForm";
+import ExpenseDialog from "../components/common/ExpenseDialog";
 import RecurringExpenses from "../components/dashboard/RecurringExpenses";
 import ExpenseAnalytics from "../components/dashboard/ExpenseAnalytics";
-import { Dialog, Toast } from "../ui";
+import { Toast } from "../ui";
 import { useToast } from "../hooks/useToast";
 import { useExpense } from "../hooks/useExpense";
+import { useDialog } from "../hooks/useDialog";
 
 function Dashboard() {
     const { expenses, recurringExpenses, loading, getExpenses, getRecurringExpenses, createExpense, deleteExpense } = useExpense();
-
-    const [open, setOpen] = useState(false);
-    const [selectedExpense, setSelectedExpense] = useState(null);
-    const [recurring, setRecurring] = useState(false);
+    const { open, selectedItem: selectedExpense, openDialog, closeDialog } = useDialog();
     const { showToast, toastRef } = useToast();
 
     useEffect(() => {
@@ -26,7 +24,7 @@ function Dashboard() {
 
         if (createExpense(data)) {
             showToast("Expense created!", "success");
-            setOpen(false);
+            closeDialog();
         } else {
             showToast("Failed to create Expense.", "error");
         }
@@ -34,9 +32,7 @@ function Dashboard() {
 
     const handleEditExpense = (id, isRecurring) => {
         const expense = isRecurring ? recurringExpenses.find((expense) => expense.id === id) : expenses.find((expense) => expense.id === id);
-        isRecurring ? setRecurring(true) : setRecurring(false);
-        setSelectedExpense(expense);
-        setOpen(true);
+        openDialog(expense);
     };
 
     const handleDeleteExpense = (id) => {
@@ -55,11 +51,7 @@ function Dashboard() {
                         expense={expenses[expenses.length - 1]}
                         onDelete={handleDeleteExpense}
                         onEdit={handleEditExpense}
-                        onCreate={() => {
-                            setRecurring(false);
-                            setSelectedExpense(null);
-                            setOpen(true);
-                        }}
+                        onCreate={openDialog}
                         loading={loading}
                     />
                 </div>
@@ -77,27 +69,14 @@ function Dashboard() {
                 </div>
             </div>
 
-            <Dialog
+            <ExpenseDialog
                 visible={open}
-                onHide={() => {
-                    setOpen(false);
-                    setSelectedExpense(null);
-                }}
-                closable={false}
-                header={selectedExpense ?
-                    (recurring ? "Edit Recurring Expense" : "Edit Expense") :
-                    (recurring ? "New Recurring Expense" : "New Expense")
-                }
-            >
-                <ExpenseForm
-                    getExpenses={getExpenses}
-                    getRecurringExpenses={getRecurringExpenses}
-                    onClose={() => { setOpen(false); setSelectedExpense(null); setRecurring(false); }}
-                    showToast={showToast}
-                    selectedExpense={selectedExpense}
-                    isRecurring={recurring}
-                />
-            </Dialog>
+                onHide={closeDialog}
+                selectedExpense={selectedExpense}
+                getExpenses={getExpenses}
+                getRecurringExpenses={getRecurringExpenses}
+                showToast={showToast}
+            />
 
             <Toast ref={toastRef} position="bottom-right" />
         </>
