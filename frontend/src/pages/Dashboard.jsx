@@ -5,96 +5,46 @@ import RecurringExpenses from "../components/dashboard/RecurringExpenses";
 import ExpenseAnalytics from "../components/dashboard/ExpenseAnalytics";
 import { Dialog, Toast } from "../ui";
 import { useToast } from "../hooks/useToast";
-import dayjs from "dayjs";
-import { ExpenseService } from "../services/api/expenseService";
-import { Expense as ExpenseModel } from "../models/expense";
-
+import { useExpense } from "../hooks/useExpense";
 
 function Dashboard() {
-    const expenseService = new ExpenseService();
+    const { expenses, recurringExpenses, loading, getExpenses, getRecurringExpenses, createExpense, deleteExpense } = useExpense();
 
     const [open, setOpen] = useState(false);
-    const [expenses, setExpenses] = useState([]);
-    const [recurringExpenses, setRecurringExpenses] = useState([]);
-    const [recurring, setRecurring] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState(null);
+    const [recurring, setRecurring] = useState(false);
     const { showToast, toastRef } = useToast();
 
     useEffect(() => {
         getExpenses();
         getRecurringExpenses();
-    }, []);
+    }, [getExpenses, getRecurringExpenses]);
 
-    const getExpenses = () => {
-        setLoading(true);
-        expenseService.getAll()
-            .then((response) => response.data)
-            .then((data) => {
-                setExpenses(data);
-            })
-            .catch((error) => {
-                showToast(error.message || "Something went wrong!", "error");
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const getRecurringExpenses = () => {
-        setLoading(true);
-        expenseService.getAllRecurring()
-            .then((response) => response.data)
-            .then((data) => {
-                setRecurringExpenses(data);
-            })
-            .catch((error) => {
-                showToast(error.message || "Something went wrong!", "error");
-            })
-            .finally(() => setLoading(false));
-    };
-
-    const createExpense = (id) => {
+    const handleCreateExpense = (id) => {
         const expense = recurringExpenses.find((expense) => expense.id === id);
         const data = new ExpenseModel(-1, -1, expense.description, expense.category_name, expense.amount, expense.currency, dayjs().format("YYYY-MM-DD"), false);
 
-        expenseService.create(data)
-            .then((response) => {
-                if (response.status === 201) {
-                    showToast("Expense created!", "success");
-                    getExpenses();
-                    getRecurringExpenses();
-                    setOpen(false);
-                }
-                else {
-                    showToast("Failed to create Expense.", "error");
-                }
-            })
-            .catch((err) => {
-                showToast(err.message || "Something went wrong!", "error");
-            });
+        if (createExpense(data)) {
+            showToast("Expense created!", "success");
+            setOpen(false);
+        } else {
+            showToast("Failed to create Expense.", "error");
+        }
     };
 
-    const editExpense = (id, isRecurring) => {
+    const handleEditExpense = (id, isRecurring) => {
         const expense = isRecurring ? recurringExpenses.find((expense) => expense.id === id) : expenses.find((expense) => expense.id === id);
         isRecurring ? setRecurring(true) : setRecurring(false);
         setSelectedExpense(expense);
         setOpen(true);
     };
 
-    const deleteExpense = (id) => {
-        expenseService.delete(id)
-            .then((response) => {
-                if (response.status === 204) {
-                    showToast("Expense deleted!", "success");
-                }
-                else {
-                    showToast("Failed to delete Expense.", "error");
-                }
-                getExpenses();
-                getRecurringExpenses();
-            })
-            .catch((error) => {
-                showToast(error.message || "Something went wrong!", "error");
-            });
+    const handleDeleteExpense = (id) => {
+        if (deleteExpense(id)) {
+            showToast("Expense deleted!", "success");
+        } else {
+            showToast("Failed to delete Expense.", "error");
+        }
     };
 
     return (
@@ -103,8 +53,8 @@ function Dashboard() {
                 <div className="col-12 lg:col-4">
                     <LastExpense
                         expense={expenses[expenses.length - 1]}
-                        onDelete={deleteExpense}
-                        onEdit={editExpense}
+                        onDelete={handleDeleteExpense}
+                        onEdit={handleEditExpense}
                         onCreate={() => {
                             setRecurring(false);
                             setSelectedExpense(null);
@@ -116,9 +66,9 @@ function Dashboard() {
                 <div className="col-12 lg:col-8">
                     <RecurringExpenses
                         expenses={recurringExpenses}
-                        onDelete={deleteExpense}
-                        onEdit={editExpense}
-                        onCreate={createExpense}
+                        onDelete={handleDeleteExpense}
+                        onEdit={handleEditExpense}
+                        onCreate={handleCreateExpense}
                         loading={loading}
                     />
                 </div>
