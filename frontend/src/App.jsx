@@ -11,6 +11,8 @@ import "primereact/resources/themes/lara-dark-green/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
+import { ProgressSpinner } from "./ui";
+import { useBackendCheck } from "./hooks/useBackendCheck";
 
 function Logout() {
   localStorage.clear();
@@ -23,6 +25,18 @@ function RegisterAndLogout() {
 }
 
 function App() {
+  const backendReady = useBackendCheck();
+
+  if (!backendReady) {
+    return <div className="flex h-screen w-screen align-items-center justify-content-center">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-4">Loading...</h1>
+        <p>Please wait while backend is starting up.</p>
+        <ProgressSpinner strokeWidth="3" />
+      </div>
+    </div>;
+  }
+
   return (
     <PrimeReactProvider>
       <BrowserRouter>

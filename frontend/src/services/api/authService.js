@@ -7,6 +7,16 @@ export class AuthService extends BaseService {
         super("api");
     }
 
+    async healthCheck() {
+        try {
+            const response = await this.http.get(`${this.endpointPath()}healthcheck/`);
+            return response.status === 200;
+        } catch (error) {
+            console.error("Backend not ready:", error);
+            return false;
+        }
+    }
+
     login(data) {
         return this.http.post(`${this.endpointPath()}token/`, data)
             .then((response) => {
@@ -54,4 +64,6 @@ export class AuthService extends BaseService {
                 return false;
             });
     }
+
+    
 }
