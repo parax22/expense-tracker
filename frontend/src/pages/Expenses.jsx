@@ -113,7 +113,7 @@ function Expenses() {
                 getExpenses={getExpenses}
                 getRecurringExpenses={getRecurringExpenses}
                 showToast={showToast}
-            />;
+            />
 
             <Toast ref={toastRef} position="bottom-right" />
         </>
