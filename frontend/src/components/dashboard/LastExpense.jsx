@@ -1,7 +1,7 @@
 import Expense from "../common/Expense";
-import { Button, ProgressSpinner } from "../../ui";
+import { Button } from "../../ui";
 
-function LastExpense({ expense, onDelete, onEdit, onCreate, loading }) {
+function LastExpense({ expense, onDelete, onEdit, onCreate }) {
     return (
         <div className="p-4 border-round h-full">
             <div className="flex flex-wrap justify-content-around align-items-center">
@@ -14,15 +14,13 @@ function LastExpense({ expense, onDelete, onEdit, onCreate, loading }) {
                     style={{ marginTop: '1rem' }}
                 />
             </div>
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <ProgressSpinner strokeWidth="3" />
-                </div>
-            ) : expense ? (
-                <Expense expense={expense} isRecurring={false} onDelete={onDelete} onEdit={onEdit} onCreate={onCreate} />
-            ) : (
-                <p>No expenses found.</p>
-            )}
+            {
+                expense ? (
+                    <Expense expense={expense} isRecurring={false} onDelete={onDelete} onEdit={onEdit} onCreate={onCreate} />
+                ) : (
+                    <p>No expenses found.</p>
+                )
+            }
         </div>
     );
 }

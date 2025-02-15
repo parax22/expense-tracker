@@ -3,7 +3,7 @@ import LastExpense from "../components/dashboard/LastExpense";
 import ExpenseDialog from "../components/common/ExpenseDialog";
 import RecurringExpenses from "../components/dashboard/RecurringExpenses";
 import ExpenseAnalytics from "../components/dashboard/ExpenseAnalytics";
-import { Toast } from "../ui";
+import { Toast, ProgressSpinner } from "../ui";
 import { useToast } from "../hooks/useToast";
 import { useExpense } from "../hooks/useExpense";
 import { useDialog } from "../hooks/useDialog";
@@ -43,6 +43,14 @@ function Dashboard() {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex justify-content-center align-items-center h-screen">
+                <ProgressSpinner strokeWidth="4" />
+            </div>
+        );
+    }
+
     return (
         <>
             <div className="grid">
@@ -52,7 +60,6 @@ function Dashboard() {
                         onDelete={handleDeleteExpense}
                         onEdit={handleEditExpense}
                         onCreate={openDialog}
-                        loading={loading}
                     />
                 </div>
                 <div className="col-12 lg:col-8">
@@ -61,11 +68,12 @@ function Dashboard() {
                         onDelete={handleDeleteExpense}
                         onEdit={handleEditExpense}
                         onCreate={handleCreateExpense}
-                        loading={loading}
                     />
                 </div>
                 <div className="col-12">
-                    <ExpenseAnalytics />
+                    <ExpenseAnalytics
+                        expenses={expenses}
+                    />
                 </div>
             </div>
 

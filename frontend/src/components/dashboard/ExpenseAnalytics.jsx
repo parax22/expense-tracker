@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Chart, Card, Avatar } from '../../ui';
+import { Chart, Card, Avatar, ProgressSpinner } from '../../ui';
 import dayjs from 'dayjs';
 import { CategoryService } from '../../services/api/categoryService';
 import { AnalyticService } from '../../services/api/analyticService';
 
-function ExpenseAnalytics() {
+function ExpenseAnalytics({ expenses }) {
     const categoryService = new CategoryService();
     const analyticsService = new AnalyticService();
     const [analytics, setAnalytics] = useState([]);
@@ -14,16 +14,21 @@ function ExpenseAnalytics() {
     const [lineChartData, setLineChartData] = useState({});
     const [categories, setCategories] = useState({});
     const [summary, setSummary] = useState([]);
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
 
     useEffect(() => {
+        setAnalyticsLoading(true);
         analyticsService.getAll()
             .then((response) => response.data)
             .then((data) => {
                 setAnalytics(data);
-            });
-    }, []);
+            })
+            .finally(() => setAnalyticsLoading(false));
+    }, [expenses]);
 
     useEffect(() => {
+        setCategoriesLoading(true);
         categoryService.getAll()
             .then((response) => response.data)
             .then((data) => {
@@ -32,8 +37,9 @@ function ExpenseAnalytics() {
                     return categoriesNames;
                 }, {});
                 setCategories(categoryMap);
-            });
-    }, []);
+            })
+            .finally(() => setCategoriesLoading(false));
+    }, [expenses]);
 
     useEffect(() => {
         if (Object.keys(categories).length === 0) return;
@@ -119,6 +125,14 @@ function ExpenseAnalytics() {
         ]);
 
     }, [analytics, categories]);
+
+    if (analyticsLoading || categoriesLoading) {
+        return (
+            <div className="flex justify-content-center align-items-center">
+                <ProgressSpinner strokeWidth="4" />
+            </div>
+        );
+    }
 
     return (
         <div className="grid text-center">
