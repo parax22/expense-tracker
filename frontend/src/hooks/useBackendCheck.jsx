@@ -9,7 +9,10 @@ export function useBackendCheck(intervalMs = 10000) {
 
     const checkBackend = async () => {
       const isReady = await authService.healthCheck();
-      if (isReady) setBackendReady(true);
+      if (isReady) {
+        setBackendReady(true);
+        clearInterval(interval);
+      }
     };
 
     const interval = setInterval(checkBackend, intervalMs);

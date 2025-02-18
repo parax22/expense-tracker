@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import LastExpense from "../components/dashboard/LastExpense";
+import { Expense } from "../models/expense";
 import ExpenseDialog from "../components/common/ExpenseDialog";
 import RecurringExpenses from "../components/dashboard/RecurringExpenses";
 import ExpenseAnalytics from "../components/dashboard/ExpenseAnalytics";
@@ -20,7 +21,7 @@ function Dashboard() {
 
     const handleCreateExpense = (id) => {
         const expense = recurringExpenses.find((expense) => expense.id === id);
-        const data = new ExpenseModel(-1, -1, expense.description, expense.category_name, expense.amount, expense.currency, dayjs().format("YYYY-MM-DD"), false);
+        const data = new Expense(-1, -1, expense.description, expense.category_name, expense.amount, expense.currency, dayjs().format("YYYY-MM-DD"), false);
 
         if (createExpense(data)) {
             showToast("Expense created!", "success");
@@ -59,7 +60,7 @@ function Dashboard() {
                         expense={expenses[expenses.length - 1]}
                         onDelete={handleDeleteExpense}
                         onEdit={handleEditExpense}
-                        onCreate={openDialog}
+                        onCreate={() => openDialog()}
                     />
                 </div>
                 <div className="col-12 lg:col-8">

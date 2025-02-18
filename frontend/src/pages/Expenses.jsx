@@ -77,7 +77,7 @@ function Expenses() {
                 <div className="flex justify-content-between align-items-center">
                     <h2>Expenses</h2>
                     <div>
-                        <Button text label="Add Expense" icon="pi pi-plus" onClick={() => setOpen(true)} />
+                        <Button text label="Add Expense" icon="pi pi-plus" onClick={() => openDialog()} />
                         <Button label="Export" icon="pi pi-download" onClick={() => exportToCSV()} />
                     </div>
                 </div>
