@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Expense, Analytics, Setting
 from decimal import Decimal
@@ -37,6 +37,44 @@ def update_analytics(sender, instance, **kwargs):
     analytics.total_amount = total_amount
     analytics.total_payments = total_payments
     analytics.save()
+
+@receiver(post_delete, sender=Expense)
+def update_analytics_on_delete(sender, instance, **kwargs):
+    user = instance.user
+    preferred_currency = user.settings.preferred_currency 
+    
+    conversion_rate = get_conversion_rate(instance.currency, preferred_currency)
+
+    expenses = Expense.objects.filter(
+        user=user,
+        category=instance.category,
+        date__month=instance.date.month,
+        date__year=instance.date.year,
+        is_recurring=False
+    )
+    
+    total_amount = Decimal('0')
+    total_payments = 0
+    
+    for expense in expenses:
+        converted_amount = expense.amount * conversion_rate
+        total_amount += converted_amount
+        total_payments += 1
+
+    analytics, created = Analytics.objects.get_or_create(
+        user=user,
+        category=instance.category,
+        month=instance.date.month,
+        year=instance.date.year,
+    )
+    
+    analytics.total_amount = total_amount
+    analytics.total_payments = total_payments
+
+    if total_payments == 0:
+        analytics.delete()
+    else:
+        analytics.save()
 
 @receiver(post_save, sender=Setting)
 def update_analytics_on_currency_change(sender, instance, created, **kwargs):
