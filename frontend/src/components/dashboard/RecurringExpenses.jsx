@@ -1,7 +1,7 @@
 import Expense from '../common/Expense';
 import { Button, Carousel } from '../../ui';
 
-function RecurringExpenses({ expenses, onDelete, onEdit, onCreate }) {
+function RecurringExpenses({ expenses, onDelete, onEdit, onCreate, onAdd }) {
     return (
         <div className="p-4 border-round h-full">
             <div className="flex flex-wrap justify-content-around align-items-center">
@@ -10,7 +10,7 @@ function RecurringExpenses({ expenses, onDelete, onEdit, onCreate }) {
                     text
                     label="Add Recurring Expense"
                     icon="pi pi-plus"
-                    onClick={onCreate}
+                    onClick={onAdd}
                     style={{ marginTop: '1rem' }}
                 />
             </div>

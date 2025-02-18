@@ -11,7 +11,7 @@ import { useDialog } from "../hooks/useDialog";
 
 function Dashboard() {
     const { expenses, recurringExpenses, loading, getExpenses, getRecurringExpenses, createExpense, deleteExpense } = useExpense();
-    const { open, selectedItem: selectedExpense, openDialog, closeDialog } = useDialog();
+    const { open, selectedItem: selectedExpense, isRecurring, openDialog, closeDialog } = useDialog();
     const { showToast, toastRef } = useToast();
 
     useEffect(() => {
@@ -69,6 +69,7 @@ function Dashboard() {
                         onDelete={handleDeleteExpense}
                         onEdit={handleEditExpense}
                         onCreate={handleCreateExpense}
+                        onAdd={() => openDialog(null, true)}
                     />
                 </div>
                 <div className="col-12">
@@ -82,6 +83,7 @@ function Dashboard() {
                 visible={open}
                 onHide={closeDialog}
                 selectedExpense={selectedExpense}
+                isRecurring={isRecurring}
                 getExpenses={getExpenses}
                 getRecurringExpenses={getRecurringExpenses}
                 showToast={showToast}
