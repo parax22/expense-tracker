@@ -74,9 +74,9 @@ function Expenses() {
     return (
         <>
             <div className="p-4 shadow-2 border-round surface-card">
-                <div className="flex justify-content-between align-items-center">
+                <div className="flex flex-wrap justify-content-between align-items-center">
                     <h2>Expenses</h2>
-                    <div>
+                    <div className="flex gap-2">
                         <Button text label="Add Expense" icon="pi pi-plus" onClick={() => openDialog()} />
                         <Button label="Export" icon="pi pi-download" onClick={() => exportToCSV()} />
                     </div>
