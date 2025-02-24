@@ -8,6 +8,7 @@ import { Toast, ProgressSpinner } from "../ui";
 import { useToast } from "../hooks/useToast";
 import { useExpense } from "../hooks/useExpense";
 import { useDialog } from "../hooks/useDialog";
+import dayjs from "dayjs";
 
 function Dashboard() {
     const { expenses, recurringExpenses, loading, getExpenses, getRecurringExpenses, createExpense, deleteExpense } = useExpense();
