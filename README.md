@@ -1,4 +1,4 @@
-# Expense Tracker 💸📊
+<!-- # Expense Tracker 💸📊
 
 This application helps you manage your expenses, track recurring payments, and analyze your spending habits with insightful analytics. Built with a modern tech stack, this project is designed to be both user-friendly and developer-friendly.
 
@@ -151,4 +151,4 @@ Contributions are welcome! If you'd like to contribute, please follow these step
 - **Django** and **React** communities for their amazing frameworks and libraries.
 - **PrimeReact** for providing a rich set of UI components.
 - **Chart.js** for making data visualization easy and interactive.
-- **ExchangeRateAPI** for providing real-time currency conversion rates.
+- **ExchangeRateAPI** for providing real-time currency conversion rates. -->
